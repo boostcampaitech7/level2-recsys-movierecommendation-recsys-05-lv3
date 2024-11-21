@@ -1,0 +1,8 @@
+src/S3Rec/code/output/
+src/S3Rec/code/__pycache__/
+src/S3Rec/code/
+
+src/EASER/output/
+
+src/ensemble/predictions
+src/ensemble/finals
