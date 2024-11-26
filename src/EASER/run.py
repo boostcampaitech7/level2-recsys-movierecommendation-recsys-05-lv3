@@ -51,6 +51,11 @@ def main(args):
 
     print("Lets Train-----------------------------------")
     BB, CC = train_higher(XtX, XtXdiag, args.lambdaBB, ZtZ, ZtZdiag, args.lambdaCC, CCmask, ZtX, args.rho, args.epochs)
+    
+    print("Saving model...")
+    np.save('./output/BB.npy', BB)
+    np.save('./output/CC.npy', CC)
+    print("Model saved successfully!")
 
 
     print("Lets Inference-----------------------------------")

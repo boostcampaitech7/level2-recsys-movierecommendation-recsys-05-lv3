@@ -1,15 +1,16 @@
+
 ---
 
 ##### 이 코드는 아래 논문과 오픈소스 코드를 참고하였습니다.
 
-Steck, Harald, and Dawen Liang. "Negative interactions for improved collaborative filtering: Don’t go deeper, go higher." Proceedings of the 15th ACM Conference on Recommender Systems. 2021.
+Shenbin, Ilya, et al. "Recvae: A new variational autoencoder for top-n recommendations with implicit feedback." Proceedings of the 13th international conference on web search and data mining. 2020.
 
-https://github.com/hasteck/Higher_Recsys_2021
 
+https://github.com/ilya-shenbin/RecVAE/tree/master
 
 ---
 
-## 🚀 EASER 사용 방법
+## 🚀 RecVAE 사용 방법
 
 ### 1. 데이터 전처리
 데이터를 전처리하려면 아래 명령어를 실행하세요:
