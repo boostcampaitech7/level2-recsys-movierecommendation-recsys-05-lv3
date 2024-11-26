@@ -111,6 +111,7 @@ for epoch in tqdm(range(args.n_epochs)):
             beta=args.beta,
             gamma=args.gamma)
         
+torch.save(model.state_dict(), "./output/vae_model_state.pth")
 
 def recommend_top_k(model, train_data, k=10, batch_size=500):
     """

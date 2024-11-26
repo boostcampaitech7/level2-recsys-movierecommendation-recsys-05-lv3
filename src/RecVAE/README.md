@@ -1,6 +1,15 @@
 
 ---
 
+##### 이 코드는 아래 논문과 오픈소스 코드를 참고하였습니다.
+
+Shenbin, Ilya, et al. "Recvae: A new variational autoencoder for top-n recommendations with implicit feedback." Proceedings of the 13th international conference on web search and data mining. 2020.
+
+
+https://github.com/ilya-shenbin/RecVAE/tree/master
+
+---
+
 ## 🚀 RecVAE 사용 방법
 
 ### 1. 데이터 전처리
