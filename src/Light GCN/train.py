@@ -7,7 +7,7 @@ from utils import create_adj_matrix, TrainDataset, calculate_recall_at_k
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-def get_predictions(model, adj_matrix, num_users, num_items, device, k=10):
+def get_predictions(model, adj_matrix, num_users, num_items, user_interactions, device, k=10):
     model.eval()
     predictions = {}
     with torch.no_grad():
@@ -15,8 +15,15 @@ def get_predictions(model, adj_matrix, num_users, num_items, device, k=10):
         for user in range(num_users):
             user_vector = user_emb[user].unsqueeze(0)
             scores = torch.mm(user_vector, item_emb.t()).squeeze()
+            
+            # 이미 시청한 아이템의 점수를 -inf로 설정
+            watched_items = user_interactions.get(user, set())
+            scores[list(watched_items)] = float('-inf')
+            
+            # 시청하지 않은 아이템 중에서 top-k 선택
             _, top_items = torch.topk(scores, k=k)
             predictions[user] = top_items.tolist()
+
     return predictions
 
 def train_model(train_data, val_data=None, n_layers=3, embedding_dim=64, batch_size=2048, num_epochs=10, patience=5):
@@ -97,21 +104,3 @@ def train_model(train_data, val_data=None, n_layers=3, embedding_dim=64, batch_s
     model.load_state_dict(checkpoint['model_state_dict'])
     
     return model, adj_matrix, model_name
-
-# if __name__ == "__main__":
-#     base_path = '/data/ephemeral/home/ryu/data/'
-    
-#     # 데이터 로드
-#     train_data = pd.read_csv(f'{base_path}/processed/processed_train_data.csv')
-#     val_data = pd.read_csv(f'{base_path}/processed/processed_val_data.csv')
-    
-#     # 전체 데이터로 학습
-#     model, adj_matrix = train_model(
-#         train_data=train_data,
-#         val_data=val_data,
-#         n_layers=3,  # 원하는 파라미터 설정
-#         embedding_dim=64,
-#         batch_size=8192,
-#         num_epochs=100,
-#         model_name='final_model'
-#     )
