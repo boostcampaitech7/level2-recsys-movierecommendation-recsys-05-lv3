@@ -39,3 +39,18 @@ class TrainDataset(Dataset):
         while neg_item in self.pos_items[self.users == user]:
             neg_item = np.random.randint(self.num_items)
         return user, pos_item, neg_item
+    
+def calculate_recall_at_k(predictions, ground_truth, k):
+    recalls = []
+    for user in ground_truth:
+        if user not in predictions:
+            continue
+        pred_items = predictions[user][:k]
+        gt_items = ground_truth[user]
+        n_rel = len(gt_items)
+        if n_rel == 0:
+            continue
+        n_rel_and_rec_k = len(set(pred_items) & gt_items)
+        recall = n_rel_and_rec_k / min(k, n_rel)
+        recalls.append(recall)
+    return np.mean(recalls)
