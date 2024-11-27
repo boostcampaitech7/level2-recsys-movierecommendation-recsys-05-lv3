@@ -1,8 +1,8 @@
 import torch
 import pandas as pd
 import os
-from train import train_model
-from recommendation import generate_recommendations, create_submission
+from train import train_model, get_predictions
+from recommendation import create_submission
 
 def main():
     base_path = '/data/ephemeral/home/ryu/data/'
@@ -33,7 +33,7 @@ def main():
     
     # 추천 생성
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    recommendations = generate_recommendations(
+    recommendations = get_predictions(
         model, 
         adj_matrix, 
         len(user_id_map), 
