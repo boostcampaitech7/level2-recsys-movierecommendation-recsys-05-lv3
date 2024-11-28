@@ -197,3 +197,5 @@ __pycache__
 src/EASE/output/
 src/EASER/output/
 src/RecVAE/output/
+
+*.csv
