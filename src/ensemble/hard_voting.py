@@ -59,8 +59,8 @@ else:
     user_recommendations = {}
     for df, weight in dataframes:
         for _, row in df.iterrows():
-            user = row[0]
-            item = row[1]
+            user = row.iloc[0]
+            item = row.iloc[1]
             if user not in user_recommendations:
                 user_recommendations[user] = Counter()
             user_recommendations[user][item] += weight
