@@ -1,4 +1,3 @@
-
 import pandas as pd
 import os
 from collections import Counter
@@ -10,7 +9,7 @@ output_final_dir = './finals'
 if not os.path.exists(output_final_dir):
     os.makedirs(output_final_dir)
 
-file_paths = [os.path.join(output_dir, file) for file in os.listdir(output_dir) if file.endswith('.csv')]
+file_paths = sorted([os.path.join(output_dir, file) for file in os.listdir(output_dir) if file.endswith('.csv')])
 
 dataframes = [pd.read_csv(file) for file in file_paths]
 
