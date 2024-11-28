@@ -82,7 +82,7 @@ def main(args):
 
     print(recommendation_df)
 
-    recommendation_df.to_csv("./output/easer.csv")
+    recommendation_df.to_csv("../../saved/easer.csv")
 
 
 if __name__ == '__main__':
