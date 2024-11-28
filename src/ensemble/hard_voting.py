@@ -21,22 +21,17 @@ while True:
     else:
         print("잘못된 입력입니다. 'y' 또는 'n'을 입력해주세요.")
 
+# 가중치 입력 부분
 weights = {}
 if use_equal_weights:
     equal_weight = 1.0 / len(file_paths)
     weights = {os.path.basename(file): equal_weight for file in file_paths}
 else:
-    total_weight = 0
     for file_path in file_paths:
         file_name = os.path.basename(file_path)
         print(f"파일: {file_name}")
         weight = float(input(f"{file_name}의 가중치를 입력하세요: "))
         weights[file_name] = weight
-        total_weight += weight
-
-    # 가중치 정규화
-    for file_name in weights:
-        weights[file_name] /= total_weight
 
 # 데이터프레임 로드 및 가중치 적용
 dataframes = [(pd.read_csv(file), weights[os.path.basename(file)]) for file in file_paths]
