@@ -71,7 +71,7 @@ else:
 
 final_df = pd.DataFrame(
     [(user, item) for user, items in final_recommendations.items() for item in items],
-    columns=["user", "recommended_item"]
+    columns=["user", "item"]
 )
 
 timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
