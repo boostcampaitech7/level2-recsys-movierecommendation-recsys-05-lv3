@@ -25,14 +25,14 @@
 
 ## 🛠️ 기술 스택 및 협업
   <img src="https://img.shields.io/badge/Python-3776AB?style=square&logo=Python&logoColor=white"/>&nbsp;
-
+  <img src="https://img.shields.io/badge/Pandas-150458?style=square&logo=Pandas&logoColor=white"/>&nbsp;
   <img src="https://img.shields.io/badge/scikitlearn-F7931E?style=square&logo=scikitlearn&logoColor=white"/>&nbsp;
   <img src="https://img.shields.io/badge/PyTorch-EE4C2C?style=flat&logo=PyTorch&logoColor=white"/>&nbsp;
 
-
-  <img src="https://img.shields.io/badge/Pandas-150458?style=square&logo=Pandas&logoColor=white"/>&nbsp;
-
+  <img src="https://img.shields.io/badge/Jira-0052CC?style=flat-square&logo=Jira&logoColor=white"/>&nbsp;
+  <img src="https://img.shields.io/badge/Confluence-0052CC?style=flat-square&logo=Jira&logoColor=white"/>&nbsp;
   <img src="https://img.shields.io/badge/Notion-000000?style=square&logo=Notion&logoColor=white"/>&nbsp;
+  <img src="https://img.shields.io/badge/Slack-4A154B?style=flat-square&logo=Slack&logoColor=white"/>&nbsp;
 
 
 ### 🤝 협업 방식
@@ -49,15 +49,61 @@
 ```bash
 project/
 │
-├── notebooks/
-│    ├── EDA.ipynb
-├── docs/
-│    └── 랩업리포트, 발표자료 등
-├── src/
-│    ├── 
-│    └──
-├── 
-└── 
+├── notebook
+│   ├── EAD_jihoon_train.ipynb
+│   ├── EDA_Jaehyun.ipynb
+│   ├── EDA_SM.ipynb
+│   ├── EDA_jihoon_basic.ipynb
+│   ├── EDA_jihoon_merged.ipynb
+│   ├── EDA_jiwon.ipynb
+│   ├── EDA_jueun.ipynb
+│   └── EDA_seyeon.ipynb
+└── src
+    ├── CDAE
+    │   └── CDAE.ipynb
+    ├── DeepFM
+    │   └── DeepFM.ipynb
+    ├── EASE
+    │   ├── README.md
+    │   ├── model.py
+    │   └── run.py
+    ├── EASER
+    │   ├── README.md
+    │   ├── model.py
+    │   ├── preprocessing.py
+    │   └── run.py
+    ├── FM
+    │   └── model.py
+    ├── Light\ GCN
+    │   ├── README.md
+    │   ├── main.py
+    │   ├── model.py
+    │   ├── preprocess.py
+    │   ├── recommendation.py
+    │   ├── train.py
+    │   └── utils.py
+    ├── RecVAE
+    │   ├── README.md
+    │   ├── dataset.py
+    │   ├── model.py
+    │   ├── preprocessing.py
+    │   └── run.py
+    ├── SASRec
+    │   ├── README.md
+    │   ├── datasets.py
+    │   ├── inference.py
+    │   ├── models.py
+    │   ├── modules.py
+    │   ├── preprocessing.py
+    │   ├── run_pretrain.py
+    │   ├── run_train.py
+    │   ├── sample_submission.ipynb
+    │   ├── trainers.py
+    │   └── utils.py
+    ├── ensemble
+    │   ├── README.md
+    │   └── hard_voting.py
+    └── test.py
 
 
 ```
