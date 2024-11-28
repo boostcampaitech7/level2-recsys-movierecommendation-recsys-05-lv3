@@ -2,6 +2,7 @@ import pandas as pd
 import os
 from collections import Counter
 from datetime import datetime
+import json
 
 output_dir = './predictions'
 output_final_dir = './finals'
@@ -41,8 +42,8 @@ if use_equal_weights:
     user_recommendations = {}
     for df, _ in dataframes:
         for _, row in df.iterrows():
-            user = row[0]
-            item = row[1]
+            user = row.iloc[0]
+            item = row.iloc[1]
             if user not in user_recommendations:
                 user_recommendations[user] = []
             user_recommendations[user].append(item)
@@ -74,6 +75,21 @@ final_df = pd.DataFrame(
 )
 
 timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+
+# 가중치의 총합 계산
+total_weight = sum(weights.values())
+
+# 가중치 정보를 JSON으로 저장 (원래 가중치와 비율 모두 저장)
+weight_info = {
+    "original_weights": weights,
+    "weight_ratios": {file: (weight / total_weight) * 100 for file, weight in weights.items()}
+}
+weight_info_file = os.path.join(output_final_dir, f'{timestamp}_weights.json')
+
+with open(weight_info_file, 'w', encoding='utf-8') as f:
+    json.dump(weight_info, f, ensure_ascii=False, indent=4)
+
+print(f"가중치 정보가 {weight_info_file}에 저장되었습니다.")
 
 output_file = os.path.join(output_final_dir, f'{timestamp}.csv')
 
