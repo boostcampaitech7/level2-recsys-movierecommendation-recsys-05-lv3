@@ -1,5 +1,18 @@
 import torch
+import torch.nn as nn
 from tqdm import tqdm
+from torch.utils.data import Dataset
+
+class PairwiseRecommendationDataset(Dataset):
+    def __init__(self, user_col, item_col, user_item_dict, all_items, item_probs, user_item_embeddings, num_negatives=1):
+        self.user_col = user_col.cpu()
+        self.item_col = item_col.cpu()
+        self.user_item_dict = user_item_dict
+        self.all_items = np.array(all_items)
+        self.item_probs = item_probs
+        self.num_negatives = num_negatives
+        self.user_item_embeddings = user_item_embeddings
+
 
 class LambdaRankLoss(nn.Module):
     def __init__(self):

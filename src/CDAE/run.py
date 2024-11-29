@@ -1,7 +1,5 @@
-import os
 import pandas as pd
 import torch
-from tqdm import tqdm
 import argparse
 from preprocessing import load_data, encode_data, generate_negative_samples, prepare_final_data
 from model import CDAEModel, train_model
@@ -56,7 +54,7 @@ def main(data_path):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data_path', type=str, required=True, default="../../../data/train/train_ratings.csv")
+    parser.add_argument('--data_path', type=str, default="./data/train/train_ratings.csv")
     
     args = parser.parse_args()
     
