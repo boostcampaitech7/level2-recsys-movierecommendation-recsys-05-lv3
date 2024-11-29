@@ -36,8 +36,8 @@ python hard_voting.py
 최종 예측 출력(.csv)과 해당 예측에 사용된 가중치 정보(.json)는 finals에 저장됩니다.
 ```
 finals/
-├── {timestamp}.csv             # 최종 예측 파일이 담기는 곳
-└── {timestamp}_weights.json    # 개별 모델들의 예측 결과를 담아두는 곳     
+├── {timestamp}.csv             # 최종 예측 파일
+└── {timestamp}_weights.json    # 예측할 때 사용된 파일별 가중치 정보    
 ```
 
 ```json
@@ -64,9 +64,9 @@ finals/
 
 ```
 ensemble/
-├── finals/   # 최종 예측 파일이 담기는 곳
-├── predictions/     # 개별 모델들의 예측 결과를 담아두는 곳
-├── hard_voting.py       # 하드 보팅 수행하기 위한 파일
+├── finals/         # 최종 예측 파일이 담기는 곳
+├── predictions/    # 개별 모델들의 예측 결과를 담아두는 곳
+├── hard_voting.py  # 하드 보팅 수행하기 위한 파일
 └── README.md       
 ```
 
