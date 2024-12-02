@@ -5,6 +5,7 @@ import random
 from model import *
 from preprocessing import *
 from train import *
+from inference import *
 
 import argparse
 
@@ -50,6 +51,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 print("--Data Prepare--")
 raw_rating_df = load_rating_data(args.path+"train_ratings.csv")
+rating_df = negative_sampling(raw_rating_df)
 
 raw_director_df = load_director_data(args.path+"directors.tsv")
 raw_writer_df = load_writer_data(args.path+"writers.tsv")
@@ -61,7 +63,7 @@ items = raw_rating_df['item'].unique()
 
 
 print("--Merge Datas--")
-merged_df = pd.merge(raw_rating_df, raw_director_df, how='left', on='item')
+merged_df = pd.merge(rating_df, raw_director_df, how='left', on='item')
 merged_df = pd.merge(merged_df, raw_writer_df, how='left', on='item')
 merged_df = pd.merge(merged_df, raw_year_df, how='left', on='item')
 merged_df = pd.merge(merged_df, raw_genre_df, how='left', on='item')
@@ -72,24 +74,24 @@ merged_df['writer_vectors'] = merged_df['writer_vectors'].apply(lambda x: np.arr
 merged_df['genre_vectors'] = merged_df['genre_vectors'].apply(lambda x: np.array(x, dtype=np.float32))
 
 merged_df = fill_na_vectors(merged_df)
-merged_df = create_feature_vectors(merged_df)
+train_df = create_feature_vectors_for_train(merged_df)
+inference_df = create_feature_vectors_for_inference(merged_df)
 
 
 
 ######## Hyperparameter ########
-batch_size = 1024 # 배치 사이즈
-shuffle = True
-embed_dim = 4 # embed feature의 dimension
-epochs = 1 # epoch 돌릴 횟수
-learning_rate = 0.0001 # 학습이 반영되는 정도를 나타내는 파라미터
-weight_decay=1e-4 # 정규화를 위한 파라미터
-# input_dim = raw_rating_df.shape[1] - 1
+batch_size = 128     
+shuffle = True          
+embed_dim = 4         
+epochs = 1            
+learning_rate = 0.0001 
+weight_decay=1e-4       
 valid_ratio = 0.1
 
 
 
 print("--Data Processing--")
-data_processing_df = data_processing(merged_df)
+data_processing_df = data_processing(train_df)
 
 print("--Data Split--")
 data_split_df = data_split(data_processing_df)
@@ -98,12 +100,17 @@ print("--Data Loader--")
 data_loader_df = data_loader(data_split_df, batch_size, shuffle, 0.1)
 
 print("--Model Load--")
-input_dim = len(merged_df['feature_vectors'][0])
-model = FactorizationMachine(input_dim, embed_dim).to(device)
+input_dim = len(train_df['feature_vectors'][0])
+model = FactorizationMachine(input_dim).to(device)
 criterion = torch.nn.BCEWithLogitsLoss()
 optimizer = torch.optim.Adam(params=model.parameters(), lr=learning_rate, amsgrad=False, weight_decay=weight_decay)
 
 print("--Training--")
 model = train(model, epochs, data_loader_df, criterion, optimizer, device, valid_ratio)
 
-print("Done")
+print("--Inference--")
+recommendation_df = generate_recommendation(model, inference_df, device, 10)
+recommendation_df = recommendation_df.sort_values('user')
+
+print("--Submission Data--")
+recommendation_df.to_csv("../../saved/FM.csv", index=False)

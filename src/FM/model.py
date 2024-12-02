@@ -1,102 +1,77 @@
 import torch
 import torch.nn as nn
-from numpy import cumsum
 
-# FM
 class FeaturesLinear(nn.Module):
-    def __init__(self, field_dims:list, output_dim:int=1, bias:bool=True):
+    def __init__(self, input_dim, bias=True):
+        """
+        선형적 중요도를 학습하는 레이어
+        input_dim: 입력 벡터의 차원 (임베딩된 벡터의 총 길이)
+        bias: Bias 사용 여부
+        """
         super().__init__()
-        self.feature_dims = sum(field_dims)
-        self.output_dim = output_dim
-        self.offsets = [0, *cumsum(field_dims)[:-1]]
-
-        self.fc = nn.Embedding(self.feature_dims, self.output_dim)
-        if bias:
-            self.bias = nn.Parameter(torch.empty((self.output_dim,)), requires_grad=True)
-    
-        self._initialize_weights()
-
-
-    def _initialize_weights(self):
-        for m in self.modules():
-            if isinstance(m, nn.Embedding):
-                nn.init.xavier_uniform_(m.weight.data)
-                # nn.init.constant_(m.weight.data, 0)  # cold-start
-            if isinstance(m, nn.Parameter):
-                nn.init.constant_(m, 0)
-
-
-    def forward(self, x: torch.Tensor):
-        x = x + x.new_tensor(self.offsets).unsqueeze(0)
-
-        return torch.sum(self.fc(x), dim=1) + self.bias if hasattr(self, 'bias') \
-                else torch.sum(self.fc(x), dim=1)
-    
-
-class FeaturesEmbedding(nn.Module):
-    def __init__(self, field_dims:list, embed_dim:int):
-        super().__init__()
-        self.embedding = nn.Embedding(sum(field_dims), embed_dim)
-        self.offsets = [0, *cumsum(field_dims)[:-1]]
-        
+        self.fc = nn.Linear(input_dim, 1, bias=bias)  # 모든 벡터 요소에 대해 선형 가중치 학습
         self._initialize_weights()
 
     def _initialize_weights(self):
-        for m in self.modules():
-            if isinstance(m, nn.Embedding):
-                nn.init.xavier_uniform_(m.weight.data)
-                # nn.init.constant_(m.weight.data, 0)  # cold-start
+        """
+        가중치 초기화 함수
+        """
+        if hasattr(self.fc, 'weight'):
+            # Linear 레이어의 가중치를 Xavier 초기화
+            nn.init.xavier_uniform_(self.fc.weight)
+
+        if hasattr(self.fc, 'bias') and self.fc.bias is not None:
+            # Bias를 0으로 초기화
+            nn.init.constant_(self.fc.bias, 0)
+
 
     def forward(self, x: torch.Tensor):
-        x = x + x.new_tensor(self.offsets).unsqueeze(0)
+        """
+        입력 텐서의 각 요소에 대해 선형 가중치를 적용
+        x: (batch_size, input_dim)
+        """
+        return self.fc(x).squeeze(1)  # (batch_size, 1) → (batch_size)
 
-        return self.embedding(x)  # (batch_size, num_fields, embed_dim)
-    
 
 class FMLayer_Dense(nn.Module):
     def __init__(self):
+        """
+        2차 상호작용을 계산하는 FM 레이어
+        """
         super().__init__()
 
-    def square(self, x:torch.Tensor):
-        return torch.pow(x,2)
-
-    def forward(self, x):
-        # square_of_sum =   # FILL HERE : Use `torch.sum()` and `self.square()` #
-        # sum_of_square =   # FILL HERE : Use `torch.sum()` and `self.square()` #
-        square_of_sum = self.square(torch.sum(x, dim=1))
-        sum_of_square = torch.sum(self.square(x), dim=1)
-        
-        return 0.5 * torch.sum(square_of_sum - sum_of_square, dim=1)
-
-
-class FMLayer_Sparse(nn.Module):
-    def __init__(self, field_dims:list, factor_dim:int):
-        super().__init__()
-        self.embedding = FeaturesEmbedding(field_dims, factor_dim)
-        self.fm = FMLayer_Dense()
-
-
-    def square(self, x):
-        return torch.pow(x,2)
-    
+    def square(self, x: torch.Tensor):
+        return torch.pow(x, 2)
 
     def forward(self, x: torch.Tensor):
-        x = self.embedding(x)
-        x = self.fm(x)
-        
-        return x
-    
+        """
+        2차 상호작용을 계산
+        x: (batch_size, num_fields, embed_dim)
+        """
+        # 각 벡터의 합을 제곱
+        square_of_sum = self.square(torch.sum(x, dim=1))  # (batch_size, embed_dim)
+        # 각 벡터의 제곱을 합산
+        sum_of_square = torch.sum(self.square(x), dim=1)  # (batch_size, embed_dim)
+        # 상호작용 계산
+        interaction = 0.5 * torch.sum(square_of_sum - sum_of_square, dim=1)  # (batch_size)
+        return interaction
+
 
 class FactorizationMachine(nn.Module):
-    def __init__(self, input_dim, embed_dim):
+    def __init__(self, input_dim):
+        """
+        input_dim: 전체 입력 벡터의 차원.
+        """
         super().__init__()
-        self.linear = nn.Linear(input_dim, 1, bias=True)
-        self.embedding = nn.Embedding(input_dim+1, embed_dim)
-        self.fm = FMLayer_Dense()
-    def forward(self, x):
-        x = torch.clamp(x, min=0, max=self.embedding.num_embeddings - 1)
-        linear_part = self.linear(x)  # 선형 항 계산
-        embedded_x = self.embedding(x.long())  # 임베딩 계산
-        fm_part = self.fm(embedded_x)  # FM 상호작용 항
-        return linear_part.squeeze(1) + fm_part
-    
+        self.linear = FeaturesLinear(input_dim)  # 선형 항 계산
+        self.fm = FMLayer_Dense()  # 2차 상호작용 계산
+
+    def forward(self, x: torch.Tensor):
+        """
+        x: (batch_size, input_dim)
+        """
+        # 선형 항 계산
+        linear_part = self.linear(x)
+        # 2차 상호작용 계산
+        fm_part = self.fm(x.unsqueeze(1))  # (batch_size, num_fields, embed_dim)
+        return linear_part + fm_part 

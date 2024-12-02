@@ -1,6 +1,4 @@
-import torch
 from tqdm import tqdm
-from sklearn.metrics import roc_auc_score
 
 # Model Train
 def train(model, epochs, dataloader, criterion, optimizer, device, valid_ratio):
@@ -43,24 +41,3 @@ def valid(model, dataloader, criterion, device):
         total_loss += loss.item()
 
     return total_loss / len(dataloader)
-
-
-def test(model, data_loader, criterion, device):
-    num_batches = len(data_loader)
-    test_loss, y_all, pred_all = 0, list(), list()
-
-    with torch.no_grad():
-        for data in data_loader:
-            x, y = data[0].to(device).float(), data[1].to(device).float()
-            pred = model(x)
-            test_loss += criterion(pred, y).item() / num_batches
-            y_all.append(y)
-            pred_all.append(pred)
-
-    y_all = torch.cat(y_all).cpu()
-    pred_all = torch.cat(pred_all).cpu()
-
-    err = roc_auc_score(y_all, torch.sigmoid(pred_all)).item()
-    print(f"Test Error: \n  AUC: {err:>8f} \n  Avg loss: {test_loss:>8f}")
-
-    return err, test_loss

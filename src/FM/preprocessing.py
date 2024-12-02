@@ -7,7 +7,6 @@ from sklearn.model_selection import train_test_split
 from torch import nn
 from tqdm import tqdm
 
-
 class Text_Dataset(Dataset):
     def __init__(self, feature_vectors, rating=None):
         self.feature_vectors = np.stack(feature_vectors)
@@ -19,11 +18,10 @@ class Text_Dataset(Dataset):
     def __getitem__(self, i):
         data = {
             'features': torch.tensor(self.feature_vectors[i], dtype=torch.float32),
+            'rating': torch.tensor(self.rating[i], dtype=torch.float32)
         }
-        if self.rating is not None:
-            data['rating'] = torch.tensor(self.rating[i], dtype=torch.float32)
         return data
-    
+
 
 def load_rating_data(file_path):
     raw_rating_df = pd.read_csv(file_path)
@@ -78,10 +76,28 @@ def load_genre_data(file_path):
     genre_multi_hot = raw_genre_df.groupby('item')['genre'].apply(
         lambda x: np.array([1 if genre in x.tolist() else 0 for genre in raw_genre_df['genre'].unique()]))
     
-    genre_ = np.concatenate([genre_multi_hot.index.to_numpy().reshape(-1, 1),
-                             np.array(genre_multi_hot).reshape(-1, 1)], axis=1)
+    genre_ = np.concatenate([genre_multi_hot.index.to_numpy().reshape(-1, 1), np.array(genre_multi_hot).reshape(-1, 1)], axis=1)
     
     return pd.DataFrame(genre_, columns=['item', 'genre_vectors'])
+
+
+def negative_sampling(raw_rating_df):
+    negative_samples = []
+    for user in tqdm(users):
+        users = raw_rating_df['user'].unique()
+        # 시청한 영화
+        positive_items = set(raw_rating_df[raw_rating_df['user'] == user]['item'])
+        # 시청하지 않은 영화
+        negative_items = set(raw_rating_df['item'].unique()) - positive_items
+        num_negatives = 50
+        sampled_negatives = np.random.choice(list(negative_items), num_negatives, replace=False)
+        for neg_movie in sampled_negatives:
+            negative_samples.append({'user': user, 'item': neg_movie, 'rating': 0})
+
+    negative_df = pd.DataFrame(negative_samples)
+    rating_df = pd.concat([raw_rating_df, negative_df], ignore_index=True)
+
+    return rating_df
 
 
 def fill_na_vectors(merged_df):
@@ -95,9 +111,9 @@ def fill_na_vectors(merged_df):
     return merged_df
 
 
-def create_feature_vectors(merged_df):
+def create_feature_vectors_for_train(merged_df):
     feature_vectors = []
-    for _, row in tqdm(merged_df.iterrows(), total=len(merged_df), desc="Processing feature vectors"):
+    for _, row in tqdm(merged_df.iterrows(), total=len(merged_df), desc="create_feature_vectors_for_train"):
         feature_vector = np.concatenate([
             np.array([row['user']]),               # user ID
             np.array([row['item']]),               # item ID
@@ -110,6 +126,25 @@ def create_feature_vectors(merged_df):
     
     merged_df['feature_vectors'] = feature_vectors
     return merged_df
+
+
+def create_feature_vectors_for_inference(merged_df):
+    for_inference_df = merged_df[['item','director_vectors', 'writer_vectors', 'year', 'genre_vectors', 'item_index']]
+    for_inference_df.drop_duplicates(subset=['item'], keep='first', inplace=True)
+
+    no_user_feature_vectors = []
+    for _, row in tqdm(for_inference_df.iterrows(), total=len(for_inference_df), desc="create_feature_vectors_for_inference"):
+        no_user_feature_vector = np.concatenate([
+            np.array([row['item_index']]),         # item ID
+            row['director_vectors'],               # 감독 벡터
+            row['writer_vectors'],                 # 작가 벡터
+            np.array([row['year']]),               # 연도 정보
+            row['genre_vectors']                   # 장르 벡터
+        ])
+        #no_user_feature_vectors = torch.tensor(no_user_feature_vector)
+        no_user_feature_vectors.append(no_user_feature_vector)
+    no_user_feature_vectors = torch.tensor(no_user_feature_vectors)
+    return no_user_feature_vectors
 
 
 def data_processing(data):
@@ -156,7 +191,7 @@ def data_split(data, valid_ratio=0.1):
 
 
 def data_loader(data, batch_size, shuffle, valid_ratio=0.1):
-   
+
     train_features = data['X_train']['feature_vectors']
     train_ratings = data['y_train'].values
     train_dataset = Text_Dataset(train_features, train_ratings)
@@ -173,5 +208,3 @@ def data_loader(data, batch_size, shuffle, valid_ratio=0.1):
     data['train_dataloader'], data['valid_dataloader'] = train_dataloader, valid_dataloader
     
     return data
-
-
