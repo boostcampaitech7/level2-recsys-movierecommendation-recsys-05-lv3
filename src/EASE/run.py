@@ -6,8 +6,9 @@ from scipy.sparse import csr_matrix
 from sklearn.preprocessing import LabelEncoder
 import torch
 import argparse
+import json
 
-from model import *
+from .model import *
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -17,7 +18,9 @@ def parse_args():
 
 def main(args):
     print("Load Data-----------------------------------")
-    train = pd.read_csv('../../../data/train/train_ratings.csv')
+    print(args)
+    
+    train = pd.read_csv(f'{args.dataset.data_path}/train_ratings.csv')
     user_list = train['user'].unique()
     item_list = train['item'].unique()
 
@@ -38,7 +41,7 @@ def main(args):
     rating_matrix = csr_matrix((data, (rows, cols)), shape=(num_users, num_items))
 
 
-    model = EASE(args._lambda)
+    model = EASE(args.model_args.EASE._lambda)
     print("Lets Data-----------------------------------")
     model.train(rating_matrix)
 
@@ -63,13 +66,20 @@ def main(args):
         for item_id in items:
             result.append((user_id, item_id))
 
-    pro_dir = os.path.join('./output/')
+    pro_dir = os.path.join(f'{args.dataset.save_path}')
     if not os.path.exists(pro_dir):
         os.makedirs(pro_dir)
     submission_df = pd.DataFrame(result, columns=['user', 'item'])
-    submission_df.to_csv(f'../../saved/EASE_{args._lambda}.csv', index=False)
+    submission_df.to_csv(f'{args.dataset.save_path}/EASE_{args.model_args.EASE._lambda}.csv', index=False)
 
 
 if __name__ == '__main__':
-    args = parse_args()
-    main(args)
+    print(22222222222)
+    parser.add_argument('args_json', type=str, help='JSON string of args')
+
+    # args_json을 파싱
+    args = parser.parse_args()
+
+
+    # args = parse_args()
+    # main(args)

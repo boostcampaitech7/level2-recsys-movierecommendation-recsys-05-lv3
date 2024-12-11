@@ -200,3 +200,6 @@ src/RecVAE/output/
 src/ensemble/finals
 
 *.csv
+
+data
+train
