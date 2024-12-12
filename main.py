@@ -8,8 +8,8 @@ import importlib
 def main(args):
 
     print(f'--------------- INIT {args.model} ---------------')
-    model_path = f'src/{args.model}/run.py'
-    model_path = 'src.EASE.run' 
+    model_path = f'src.{args.model}.run'
+    
     print(model_path)
     module = importlib.import_module(model_path)
     model = getattr(module, 'main')
