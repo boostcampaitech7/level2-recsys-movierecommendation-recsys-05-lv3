@@ -1,14 +1,24 @@
 seed : 0
 device: cpu
-model: EASE
+model: ER
 
 model_args:
   EASE:
     _lambda : 1000
   SASRec:
     Create : False
-    
+
+EASER:
+  create: True
+  epochs: 1
+  threshold: 3500
+  lambdaBB: 1000
+  lambdaCC: 10000
+  rho: 50000
+  k: 10
+
 
 dataset :
   data_path : train/
   save_path : output/
+  preprocessing_path : train/preprocessing
