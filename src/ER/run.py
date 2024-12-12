@@ -23,10 +23,10 @@ def parse_args():
 
 def main(args):
     print("Prepare Data-----------------------------------")
-    
+    args.dataset.preprocessing_path = args.dataset.preprocessing_path +f'/{args.model}'
     if args.EASER.create :
         Preprocessing(args.dataset.data_path,args.dataset.preprocessing_path)
-    print('111111111111111111111111111111111111')
+
     unique_sid = list()
     with open(os.path.join(f'{args.dataset.preprocessing_path}/unique_sid.txt'), 'r') as f:
         for line in f:

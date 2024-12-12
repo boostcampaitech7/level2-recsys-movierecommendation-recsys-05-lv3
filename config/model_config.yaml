@@ -20,5 +20,5 @@ EASER:
 
 dataset :
   data_path : train/
-  save_path : output/
-  preprocessing_path : train/preprocessing
+  output_path : saved/output
+  preprocessing_path : saved/preprocessed/
