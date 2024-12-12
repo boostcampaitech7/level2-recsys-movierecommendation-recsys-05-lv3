@@ -81,7 +81,7 @@ def load_genre_data(file_path):
     return pd.DataFrame(genre_, columns=['item', 'genre_vectors'])
 
 
-def negative_sampling(raw_rating_df):
+def negative_sampling(raw_rating_df, users):
     negative_samples = []
     for user in tqdm(users):
         users = raw_rating_df['user'].unique()
@@ -129,13 +129,13 @@ def create_feature_vectors_for_train(merged_df):
 
 
 def create_feature_vectors_for_inference(merged_df):
-    for_inference_df = merged_df[['item','director_vectors', 'writer_vectors', 'year', 'genre_vectors', 'item_index']]
+    for_inference_df = merged_df[['item','director_vectors', 'writer_vectors', 'year', 'genre_vectors']]
     for_inference_df.drop_duplicates(subset=['item'], keep='first', inplace=True)
 
     no_user_feature_vectors = []
     for _, row in tqdm(for_inference_df.iterrows(), total=len(for_inference_df), desc="create_feature_vectors_for_inference"):
         no_user_feature_vector = np.concatenate([
-            np.array([row['item_index']]),         # item ID
+            np.array([row['item']]),         # item ID
             row['director_vectors'],               # 감독 벡터
             row['writer_vectors'],                 # 작가 벡터
             np.array([row['year']]),               # 연도 정보

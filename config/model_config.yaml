@@ -1,6 +1,6 @@
 seed : 0
 device: cpu
-model: RecVAE
+model: FM
 
 model_args:
   EASE:
@@ -34,6 +34,15 @@ RecVAE:
   min_users_per_item: 1
   min_items_per_user: 0
 
+FM:
+    seed: 0
+    batch_size: 4096
+    epochs: 1
+    embed_dim: 1
+    learning_rate: 0.01
+    weight_decay: 1e-4
+    valid_ratio: 0.1
+    shuffle: True
 
 
 dataset :
