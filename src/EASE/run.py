@@ -70,7 +70,7 @@ def main(args):
     if not os.path.exists(pro_dir):
         os.makedirs(pro_dir)
     submission_df = pd.DataFrame(result, columns=['user', 'item'])
-    submission_df.to_csv(f'{args.dataset.save_path}/EASE_{args.model_args.EASE._lambda}.csv', index=False)
+    submission_df.to_csv(f'{args.dataset.save_path}/EASE.csv', index=False)
 
 
 if __name__ == '__main__':
