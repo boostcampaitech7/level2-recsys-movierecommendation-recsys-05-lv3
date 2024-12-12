@@ -1,15 +1,50 @@
 import numpy as np
 import torch
 from torch import optim
-from copy import deepcopy
 from tqdm import tqdm
 import pandas as pd
 
-from dataset import *
-from model import *
-from inference import recommend_top_k  # Import the function
+from .dataset import *
+from .model import *
+from .inference import recommend_top_k  
 from .preprocessing import *
 
+
+class Batch:
+    def __init__(self, device, idx, data_in):
+        self._device = device
+        self._idx = idx
+        self._data_in = data_in
+    
+    def get_ratings_to_dev(self):
+        return torch.Tensor(self._data_in[self._idx].toarray()).to(self._device)
+    
+def _generate(batch_size, device, data_in, shuffle=False):
+    total_samples = data_in.shape[0]
+    idxlist = np.arange(total_samples)
+
+    if shuffle:
+        np.random.shuffle(idxlist)
+
+    for st_idx in range(0, total_samples, batch_size):
+        end_idx = min(st_idx + batch_size, total_samples)
+        idx = idxlist[st_idx:end_idx]
+        yield Batch(device, idx, data_in)
+
+def run(model, opts, train_data, batch_size, n_epochs, beta, gamma, device):
+    model.train()
+    for epoch in range(n_epochs):
+        for batch in _generate(batch_size=batch_size, device=device, data_in=train_data, shuffle=True):
+            ratings = batch.get_ratings_to_dev()
+
+            for optimizer in opts:
+                optimizer.zero_grad()
+                
+            _, loss = model(ratings, beta=beta, gamma=gamma)
+            loss.backward()
+            
+            for optimizer in opts:
+                optimizer.step()
 
 def main(args):
 
@@ -20,7 +55,7 @@ def main(args):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     
     print("Prepare Data-----------------------------------")
-    args.dataset.preprocessing_path = args.dataset.preprocessing_path +f'/{args.model}'
+    args.dataset.preprocessing_path = args.dataset.preprocessing_path +f'{args.model}'
     if args.EASER.create :
         preprocessor = Preprocessing(data_dir=args.dataset.data_path, output_dir=args.dataset.preprocessing_path, 
                                      threshold=args.RecVAE.threshold, min_items_per_user=args.RecVAE.min_items_per_user, 
@@ -28,10 +63,8 @@ def main(args):
         preprocessor.load_data()
         preprocessor.process()
 
-
-
-
-    train_data, unique_sid, unique_uid = get_data(args.dataset.preprocessing_path)  
+    loader = DatasetLoader(args.dataset.preprocessing_path, global_indexing=False)
+    train_data, unique_sid, unique_uid = loader.get_data()
 
     batch_size= args.RecVAE.batch_size
     beta= args.RecVAE.beta
@@ -58,7 +91,8 @@ def main(args):
                 batch_size=batch_size,
                 n_epochs=n_epochs,
                 beta=beta,
-                gamma=gamma)
+                gamma=gamma,
+                device=device)
         else:
             run(model=model,
                 opts=[optimizer_encoder],
@@ -66,7 +100,8 @@ def main(args):
                 batch_size=batch_size,
                 n_epochs=args.RecVAE.n_enc_epochs,
                 beta=beta,
-                gamma=gamma)
+                gamma=gamma,
+                device=device)
             
             model.update_prior() 
             
@@ -76,11 +111,12 @@ def main(args):
                 batch_size=batch_size,
                 n_epochs=args.RecVAE.n_dec_epochs,
                 beta=beta,
-                gamma=gamma)
+                gamma=gamma,
+                device=device)
 
-    torch.save(model.state_dict(), "./output/vae_model_state.pth")
+    # 모델 저장하시려면 이 밑의 코드의 주석을 풀어주세요!!!!!!!!
+    # torch.save(model.state_dict(), "./output/vae_model_state.pth")
 
-    # Use the imported function for recommendations
     k = 10  
     recommendations = recommend_top_k(model, train_data, device=device, k=k)
 
@@ -99,7 +135,7 @@ def main(args):
 
     print(recommendation_df)
 
-    recommendation_df.to_csv("../../saved/recVAE_submission.csv")
+    recommendation_df.to_csv(args.dataset.output_path+"recVAE_submission.csv")
 
 if __name__ == '__main__':
     args = parse_args()

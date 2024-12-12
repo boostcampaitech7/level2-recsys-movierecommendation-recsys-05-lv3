@@ -10,7 +10,7 @@ def main(args):
     print(f'--------------- INIT {args.model} ---------------')
     model_path = f'src.{args.model}.run'
     
-    print(model_path)
+    print(args.model,"모델 하시는 거 맞죠?")
     module = importlib.import_module(model_path)
     model = getattr(module, 'main')
     model(args)
@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     # add basic arguments (no default value)
     arg('--config', '-c', '--c', type=str, 
-        help='Configuration 파일을 설정합니다.', required=True)
+        help='Configuration 파일을 설정합니다.', default="./config/model_config.yaml")
     arg('--model', '-m', '--m', type=str, 
         choices=['ELECTRA','VGGNet','RoBERTa','ResNet','CLIP'],
         help='학습 및 예측할 모델을 선택할 수 있습니다.')

@@ -4,7 +4,7 @@ import pandas as pd
 class Preprocessing:
     def __init__(self, data_dir, output_dir, threshold=None, min_items_per_user=1, min_users_per_item=0):
         self.dataset = data_dir+'train_ratings.csv'
-        self.output_dir = output_dir+"RecVAE/"
+        self.output_dir = output_dir
         self.threshold = threshold
         self.min_uc = min_items_per_user
         self.min_sc = min_users_per_item
