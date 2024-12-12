@@ -1,6 +1,6 @@
 seed : 0
 device: cpu
-model: ER
+model: RecVAE
 
 model_args:
   EASE:
@@ -17,8 +17,26 @@ EASER:
   rho: 50000
   k: 10
 
+RecVAE:
+  create: True
+  hidden_dim: 600
+  latent_dim: 200
+  batch_size: 500
+  beta: None
+  gamma: 0.003
+  lr: 0.0005
+  n_epochs: 100
+  n_enc_epochs: 3
+  n_dec_epochs: 1
+  not_alternating: False
+
+  threshold: None
+  min_users_per_item: 1
+  min_items_per_user: 0
+
+
 
 dataset :
-  data_path : train/
+  data_path : ../train/
   output_path : saved/output
   preprocessing_path : saved/preprocessed/

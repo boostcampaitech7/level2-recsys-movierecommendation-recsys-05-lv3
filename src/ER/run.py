@@ -9,17 +9,6 @@ import argparse
 from .preprocessing import *
 from .model import *
 
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--epochs', type=int, default=100)
-    parser.add_argument('--threshold', type=int, default=3500)
-    parser.add_argument('--lambdaBB', type=int, default=1000)
-    parser.add_argument('--lambdaCC', type=int, default=10000)
-    parser.add_argument('--rho', type=int, default=50000)
-    parser.add_argument('--k', type=int, default=10)
-
-    return parser.parse_args()
-
 
 def main(args):
     print("Prepare Data-----------------------------------")
@@ -67,7 +56,7 @@ def main(args):
     pred_val = (X).dot(BB) + Z.dot(CC)
     pred_val[X.nonzero()] = -np.inf  
     
-    idx_topk_part = bn.argpartition(-pred_val,  args.k, axis=1)
+    idx_topk_part = bn.argpartition(-pred_val,  args.EASER.k, axis=1)
     topk_part = pred_val[np.arange(pred_val.shape[0])[:, np.newaxis], idx_topk_part[:, :args.EASER.k]]
     idx_part = np.argsort(-topk_part, axis=1)
     top_k_recommendations = idx_topk_part[np.arange(pred_val.shape[0])[:, np.newaxis], idx_part]
@@ -87,7 +76,7 @@ def main(args):
 
     print(recommendation_df)
 
-    recommendation_df.to_csv(f'{args.dataset.save_path}/EASER.csv')
+    recommendation_df.to_csv(f'{args.dataset.output_path}/EASER.csv')
 
 
 if __name__ == '__main__':
