@@ -1,11 +1,11 @@
 import pandas as pd
 
 
-def main():
-        genres_df = pd.read_csv("data/train/genres.tsv", sep="\t")
-        directors_df = pd.read_csv('data/train/directors.tsv', sep='\t')
-        years_df = pd.read_csv("data/train/years.tsv", sep="\t")
-        writers_df = pd.read_csv('data/train/writers.tsv', sep='\t')
+def main(args):
+        genres_df = pd.read_csv(f"{args.dataset.data_path}/genres.tsv", sep="\t")
+        directors_df = pd.read_csv(f'{args.dataset.data_path}/directors.tsv', sep='\t')
+        years_df = pd.read_csv(f"{args.dataset.data_path}/years.tsv", sep="\t")
+        writers_df = pd.read_csv(f'{args.dataset.data_path}/writers.tsv', sep='\t')
 
         # 연도 데이터 전처리
         min_year = years_df['year'].min()
@@ -20,12 +20,6 @@ def main():
         tmp = pd.merge(genres_grouped, years_df[['item', 'new_year']], on='item', how='left')
         tmp['new_year'], _ = pd.factorize(tmp['new_year'])
         tmp['new_year'] += max(genres_df['genre']) + 1
-
-        # 장르와 연도 데이터 결합
-        tmp['combined'] = tmp.apply(lambda row: row['genre'] + [row['new_year']], axis=1)
-
-        # JSON 저장
-        tmp['combined'].to_json("data/train/Ml_item2attributes.json")
 
         # 감독 데이터 전처리
         directors_df['director'], _ = pd.factorize(directors_df['director'])
@@ -59,8 +53,4 @@ def main():
             print('Generate Data' + '-' * 89)
 
         # 최종 JSON 저장
-        tmp.set_index('item')['combined'].to_json("data/train/Ml_item2attributes1.json")
-
-    
-if __name__ == "__main__":
-    main()
+        tmp.set_index('item')['combined'].to_json(f"{args.dataset.preprocessing_path}/Ml_item2attributes1.json")
