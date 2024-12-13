@@ -1,5 +1,5 @@
 data:
-  file_path: "data/train/train_ratings.csv"
+  file_path: "../train/train_ratings.csv"
   output_path: "output/NCF.csv"
 
 model:
