@@ -5,6 +5,15 @@ model: EASE
 
 
 model_args:
+  DeepFM:
+    embedding_dim: 32
+    mlp_dims: [64, 32, 16]
+    drop_rate: 0.1
+    learning_rate: 0.001
+    epochs: 10
+    batch_size: 64
+    num_negatives: 10
+    
   EASE:
     _lambda : 1000
     
