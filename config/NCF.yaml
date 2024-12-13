@@ -1,16 +1,20 @@
-data:
-  file_path: "../train/train_ratings.csv"
+seed : 0
+device: cpu
+model: NCF
+
+model_args:
+  NCF:
+    embed_dim: 16
+    hidden_dim: 64
+
+    epochs: 10
+    lr: 0.001
+    batch_size: 64
+    num_negatives: 4
+
+    top_k: 10
+
+  
+dataset:
+  data_path : ../train/
   output_path: "output/NCF.csv"
-
-model:
-  embed_dim: 16
-  hidden_dim: 64
-
-training:
-  epochs: 10
-  lr: 0.001
-  batch_size: 64
-  num_negatives: 4
-
-recommendation:
-  top_k: 10

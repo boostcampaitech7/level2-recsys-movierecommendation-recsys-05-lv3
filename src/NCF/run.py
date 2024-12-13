@@ -39,11 +39,7 @@ def recommend_all_users(model, interaction_matrix, user_mapping, item_mapping, t
 
 def main(args):
 
-    # Load config
-    with open(args.config, "r") as file:
-        config = yaml.safe_load(file)
-
-    file_path = config['data']['file_path']
+    file_path = args.dataset.data_path+"train_ratings.csv"
     df = pd.read_csv(file_path)
 
     # Preprocess data
@@ -52,24 +48,24 @@ def main(args):
     num_items = len(item_mapping)
 
     # Negative Sampling
-    negative_df = negative_sampling(df, num_items, num_negatives=config['training']['num_negatives'])
+    negative_df = negative_sampling(df, num_items, num_negatives=args.model_args.num_negative)
     train_df = pd.concat([df, negative_df])
 
     # Create DataLoader
     train_dataset = InteractionDataset(train_df)
-    train_loader = DataLoader(train_dataset, batch_size=config['training']['batch_size'], shuffle=True)
+    train_loader = DataLoader(train_dataset, batch_size=args.model_args.batch_size, shuffle=True)
 
     # Initialize and Train Model
-    model = NCF(num_users, num_items, embed_dim=config['model']['embed_dim'], hidden_dim=config['model']['hidden_dim'])
+    model = NCF(num_users, num_items, embed_dim=args.model_args.embed_dim, hidden_dim=args.model_args.hidden_dim)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    train_model(model, train_loader, epochs=config['training']['epochs'], lr=config['training']['lr'], device=device)
+    train_model(model, train_loader, epochs=args.model_args.epochs, lr=args.model_args.lr, device=device)
 
     # Generate Recommendations
     interaction_matrix = create_interaction_matrix(df, num_users, num_items)
-    recommendation_df = recommend_all_users(model, interaction_matrix, user_mapping, item_mapping, top_k=config['recommendation']['top_k'], device=device)
+    recommendation_df = recommend_all_users(model, interaction_matrix, user_mapping, item_mapping, top_k=args.model_args.top_k, device=device)
 
     # Save Recommendations
-    output_dir = os.path.dirname(config['data']['output_path'])
+    output_dir = os.path.dirname(args.dataset.output_path)
     os.makedirs(output_dir, exist_ok=True)
-    recommendation_df.to_csv(config['data']['output_path'], index=False)
-    print(f"Recommendations saved to {config['data']['output_path']}")
+    recommendation_df.to_csv((args.dataset.output_path+"NCF.csv"), index=False)
+    print(f"Recommendations saved to {args.dataset.output_path+"NCF.csv"}")
