@@ -19,7 +19,7 @@ def parse_args():
 def main(args):
     print("Load Data-----------------------------------")
     print(args)
-    
+
     train = pd.read_csv(f'{args.dataset.data_path}/train_ratings.csv')
     user_list = train['user'].unique()
     item_list = train['item'].unique()
@@ -41,7 +41,7 @@ def main(args):
     rating_matrix = csr_matrix((data, (rows, cols)), shape=(num_users, num_items))
 
 
-    model = EASE(args.model_args.EASE._lambda)
+    model = EASE(args.model_args._lambda)
     print("Lets Data-----------------------------------")
     model.train(rating_matrix)
 
@@ -73,13 +73,4 @@ def main(args):
     submission_df.to_csv(f'{args.dataset.save_path}/EASE.csv', index=False)
 
 
-if __name__ == '__main__':
-    print(22222222222)
-    parser.add_argument('args_json', type=str, help='JSON string of args')
 
-    # args_json을 파싱
-    args = parser.parse_args()
-
-
-    # args = parse_args()
-    # main(args)

@@ -58,23 +58,23 @@ def main(args):
     args.dataset.preprocessing_path = args.dataset.preprocessing_path +f'{args.model}'
     if args.EASER.create :
         preprocessor = Preprocessing(data_dir=args.dataset.data_path, output_dir=args.dataset.preprocessing_path, 
-                                     threshold=args.RecVAE.threshold, min_items_per_user=args.RecVAE.min_items_per_user, 
-                                     min_users_per_item=args.RecVAE.min_users_per_item)
+                                     threshold=args.model_args.threshold, min_items_per_user=args.model_args.min_items_per_user, 
+                                     min_users_per_item=args.model_args.min_users_per_item)
         preprocessor.load_data()
         preprocessor.process()
 
     loader = DatasetLoader(args.dataset.preprocessing_path, global_indexing=False)
     train_data, unique_sid, unique_uid = loader.get_data()
 
-    batch_size= args.RecVAE.batch_size
-    beta= args.RecVAE.beta
-    gamma= args.RecVAE.gamma
-    lr=args.RecVAE.lr
-    n_epochs= args.RecVAE.n_epochs
+    batch_size= args.model_args.batch_size
+    beta= args.model_args.beta
+    gamma= args.model_args.gamma
+    lr=args.model_args.lr
+    n_epochs= args.model_args.n_epochs
 
     model_kwargs = {
-        'hidden_dim': args.RecVAE.hidden_dim,
-        'latent_dim': args.RecVAE.latent_dim,
+        'hidden_dim': args.model_args.hidden_dim,
+        'latent_dim': args.model_args.latent_dim,
         'input_dim': train_data.shape[1]
     }
 
@@ -84,7 +84,7 @@ def main(args):
     optimizer_decoder = optim.Adam(model.decoder.parameters(), lr=lr)
 
     for epoch in tqdm(range(n_epochs)):
-        if args.RecVAE.not_alternating:
+        if args.model_args.not_alternating:
             run(model=model,
                 opts=[optimizer_encoder, optimizer_decoder],
                 train_data=train_data,
@@ -98,7 +98,7 @@ def main(args):
                 opts=[optimizer_encoder],
                 train_data=train_data,
                 batch_size=batch_size,
-                n_epochs=args.RecVAE.n_enc_epochs,
+                n_epochs=args.model_args.n_enc_epochs,
                 beta=beta,
                 gamma=gamma,
                 device=device)
@@ -109,7 +109,7 @@ def main(args):
                 opts=[optimizer_decoder],
                 train_data=train_data,
                 batch_size=batch_size,
-                n_epochs=args.RecVAE.n_dec_epochs,
+                n_epochs=args.model_args.n_dec_epochs,
                 beta=beta,
                 gamma=gamma,
                 device=device)
@@ -136,7 +136,3 @@ def main(args):
     print(recommendation_df)
 
     recommendation_df.to_csv(args.dataset.output_path+"recVAE_submission.csv")
-
-if __name__ == '__main__':
-    args = parse_args()
-    main(args)

@@ -30,14 +30,14 @@ def parse_args():
 def main(args):
     # args = parse_args()
 
-    batch_size = args.FM.batch_size
-    epochs = args.FM.epochs
-    embed_dim = args.FM.embed_dim
-    learning_rate = args.FM.learning_rate
-    weight_decay = args.FM.weight_decay
-    valid_ratio = args.FM.valid_ratio
-    shuffle = args.FM.shuffle
-    seed = args.FM.seed
+    batch_size = args.model_args.batch_size
+    epochs = args.model_args.epochs
+    embed_dim = args.model_args.embed_dim
+    learning_rate = args.model_args.learning_rate
+    weight_decay = args.model_args.weight_decay
+    valid_ratio = args.model_args.valid_ratio
+    shuffle = args.model_args.shuffle
+    seed = args.model_args.seed
 
     random.seed(seed)
     np.random.seed(seed)
