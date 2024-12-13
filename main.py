@@ -34,7 +34,7 @@ if __name__ == "__main__":
         help='Configuration 파일을 설정합니다.', default="./config/model_config.yaml")
     arg('--model', '-m', '--m', type=str, 
         
-        choices=['EASE','EASER','RecVAE','FM',"RecVAE",'SAS', 'DeepFM'],
+        choices=['EASE','EASER','RecVAE','FM',"RecVAE",'SAS'],
         help='학습 및 예측할 모델을 선택할 수 있습니다.')
     arg('--device', '-d', '--d', type=str, 
         choices=['cuda', 'cpu', 'mps'], help='사용할 디바이스를 선택할 수 있습니다.')
