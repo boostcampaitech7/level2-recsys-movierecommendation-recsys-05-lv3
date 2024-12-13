@@ -42,24 +42,29 @@ def main(args):
     file_path = args.dataset.data_path+"train_ratings.csv"
     df = pd.read_csv(file_path)
 
+    print("Preprocess data--------------")
     # Preprocess data
     df, user_mapping, item_mapping = preprocess_data(df)
     num_users = len(user_mapping)
     num_items = len(item_mapping)
 
+    print("Negative Sampling--------------")
     # Negative Sampling
-    negative_df = negative_sampling(df, num_items, num_negatives=args.model_args.num_negative)
+    negative_df = negative_sampling(df, num_items, num_negatives=args.model_args.num_negatives)
     train_df = pd.concat([df, negative_df])
 
+    print("Create DataLoader--------------")
     # Create DataLoader
     train_dataset = InteractionDataset(train_df)
     train_loader = DataLoader(train_dataset, batch_size=args.model_args.batch_size, shuffle=True)
 
+    print("Initialize and Train Model--------------")
     # Initialize and Train Model
     model = NCF(num_users, num_items, embed_dim=args.model_args.embed_dim, hidden_dim=args.model_args.hidden_dim)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     train_model(model, train_loader, epochs=args.model_args.epochs, lr=args.model_args.lr, device=device)
 
+    print("Generate Recommendations--------------")
     # Generate Recommendations
     interaction_matrix = create_interaction_matrix(df, num_users, num_items)
     recommendation_df = recommend_all_users(model, interaction_matrix, user_mapping, item_mapping, top_k=args.model_args.top_k, device=device)

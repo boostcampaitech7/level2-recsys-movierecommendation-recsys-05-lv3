@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data import DataLoader
-from model import NCF
+from .model import NCF
 
 def train_model(model, train_loader, epochs, lr, device):
     model.to(device)

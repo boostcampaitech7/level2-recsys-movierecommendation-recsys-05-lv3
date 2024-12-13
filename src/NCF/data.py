@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import torch
 
 def create_interaction_matrix(df, num_users, num_items):
     import scipy.sparse as sp
