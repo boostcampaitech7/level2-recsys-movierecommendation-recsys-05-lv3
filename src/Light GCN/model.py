@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class LightGCN(nn.Module):
-    def __init__(self, n_users, n_items, n_layers, embedding_dim):
+    def __init__(self, n_users, n_items, n_layers, embedding_dim, lr=1e-5):
         super(LightGCN, self).__init__()
         self.n_users = n_users
         self.n_items = n_items
@@ -12,6 +12,7 @@ class LightGCN(nn.Module):
         self.item_embedding = nn.Embedding(n_items, embedding_dim)
         nn.init.normal_(self.user_embedding.weight, std=0.1)
         nn.init.normal_(self.item_embedding.weight, std=0.1)
+        self.lr = lr
 
     def forward(self, adj_matrix):
         all_embeddings = torch.cat([self.user_embedding.weight, self.item_embedding.weight])
@@ -30,4 +31,4 @@ class LightGCN(nn.Module):
         neg_scores = torch.sum(users_emb * neg_emb, dim=1)
         loss = -torch.mean(F.logsigmoid(pos_scores - neg_scores))
         l2_reg = (users_emb.norm(2).pow(2) + pos_emb.norm(2).pow(2) + neg_emb.norm(2).pow(2)) / len(users)
-        return loss + l2_reg * 1e-5
+        return loss + l2_reg * self.lr
