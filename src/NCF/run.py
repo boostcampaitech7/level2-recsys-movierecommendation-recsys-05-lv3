@@ -4,9 +4,9 @@ import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader
-from preprocessing import preprocess_data, negative_sampling, create_interaction_matrix, InteractionDataset
-from model import NCF
-from train import train_model
+from .preprocessing import preprocess_data, negative_sampling, create_interaction_matrix, InteractionDataset
+from .model import NCF
+from .train import train_model
 
 def recommend_all_users(model, interaction_matrix, user_mapping, item_mapping, top_k=10, device='cpu'):
     model.eval()
