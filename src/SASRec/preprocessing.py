@@ -1,11 +1,17 @@
+import os
+
 import pandas as pd
 
 
-def main(args):
-        genres_df = pd.read_csv(f"{args.dataset.data_path}/genres.tsv", sep="\t")
-        directors_df = pd.read_csv(f'{args.dataset.data_path}/directors.tsv', sep='\t')
-        years_df = pd.read_csv(f"{args.dataset.data_path}/years.tsv", sep="\t")
-        writers_df = pd.read_csv(f'{args.dataset.data_path}/writers.tsv', sep='\t')
+def item2aatributes(args):
+        
+        data_path = args.dataset.data_path
+        output_dir = f'{args.dataset.preprocessing_path}/SAS/'
+
+        genres_df = pd.read_csv(f"{data_path}/genres.tsv", sep="\t")
+        directors_df = pd.read_csv(f'{data_path}/directors.tsv', sep='\t')
+        years_df = pd.read_csv(f"{data_path}/years.tsv", sep="\t")
+        writers_df = pd.read_csv(f'{data_path}/writers.tsv', sep='\t')
 
         # 연도 데이터 전처리
         min_year = years_df['year'].min()
@@ -52,5 +58,8 @@ def main(args):
         else:
             print('Generate Data' + '-' * 89)
 
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
         # 최종 JSON 저장
-        tmp.set_index('item')['combined'].to_json(f"{args.dataset.preprocessing_path}/Ml_item2attributes1.json")
+        tmp.set_index('item')['combined'].to_json(f"{output_dir}/Ml_item2attributes1.json")
+        print(1111111)

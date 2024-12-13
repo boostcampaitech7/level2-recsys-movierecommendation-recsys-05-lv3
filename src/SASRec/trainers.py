@@ -4,7 +4,7 @@ import torch.nn as nn
 import tqdm
 from torch.optim import Adam
 
-from utils import ndcg_k, recall_at_k
+from .utils import ndcg_k, recall_at_k
 
 
 class Trainer:

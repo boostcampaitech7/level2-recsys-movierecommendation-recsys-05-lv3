@@ -5,6 +5,7 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 
+from .preprocessing import item2aatributes
 from .datasets import SASRecDataset
 from .models import S3RecModel
 from .trainers import FinetuneTrainer
@@ -17,7 +18,11 @@ from .utils import (
 )
 
 
-def main():
+def main(args):
+
+    if args.model_args.item_attribute_create :
+        item2aatributes(args)
+    return
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--data_dir", default="../data/train/", type=str)
@@ -158,5 +163,3 @@ def main():
     print(result_info)
 
 
-if __name__ == "__main__":
-    main()
