@@ -5,10 +5,10 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader, RandomSampler
 
-from datasets import PretrainDataset
-from models import S3RecModel
-from trainers import PretrainTrainer
-from utils import (
+from .datasets import PretrainDataset
+from .models import S3RecModel
+from .trainers import PretrainTrainer
+from .utils import (
     EarlyStopping,
     check_path,
     get_item2attribute_json,

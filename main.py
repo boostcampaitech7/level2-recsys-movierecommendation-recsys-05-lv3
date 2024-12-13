@@ -61,7 +61,6 @@ if __name__ == "__main__":
     if config_args.model :
         config_yaml.model = config_args.model
 
-
     if hasattr(config_yaml, 'model_args') and hasattr(config_yaml.model_args, config_yaml.model):
         config_yaml.model_args = config_yaml.model_args[config_yaml.model]
     else:

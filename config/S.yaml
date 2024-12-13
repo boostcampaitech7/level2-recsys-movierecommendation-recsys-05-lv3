@@ -6,8 +6,7 @@ model: SASRec
 
 model_args:
   SASRec:
-    Create : False
-    
+    item_attribute_create : True
 
 dataset :
   data_path : ../train/
