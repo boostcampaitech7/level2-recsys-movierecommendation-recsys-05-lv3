@@ -17,4 +17,4 @@ model_args:
   
 dataset:
   data_path : ../train/
-  output_path: "output/NCF.csv"
+  output_path : saved/output
