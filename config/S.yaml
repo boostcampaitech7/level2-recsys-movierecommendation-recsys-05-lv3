@@ -1,0 +1,15 @@
+seed : 0
+device: cpu
+model: SASRec
+
+
+
+model_args:
+  SASRec:
+    Create : False
+    
+
+dataset :
+  data_path : ../train/
+  output_path : saved/output
+  preprocessing_path : saved/preprocessed/
