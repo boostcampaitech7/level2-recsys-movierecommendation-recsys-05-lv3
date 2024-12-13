@@ -9,9 +9,11 @@ from .preprocessing import *
 from .model import *
 
 
+
 def main(args):
     print("Prepare Data-----------------------------------")
     args.dataset.preprocessing_path = args.dataset.preprocessing_path +f'/{args.model}'
+    
     if args.EASER.create :
         Preprocessing(args.dataset.data_path,args.dataset.preprocessing_path)
 
@@ -32,7 +34,7 @@ def main(args):
     XtXdiag = deepcopy(np.diag(XtX))
 
     XtX[np.diag_indices(XtX.shape[0])] = XtXdiag  
-    ii_feature_pairs = create_list_feature_pairs(XtX, args.EASER.threshold)
+    ii_feature_pairs = create_list_feature_pairs(XtX, args.model_args.threshold)
     print("number of feature-pairs: {}".format(len(ii_feature_pairs[0])))
 
     Z, CCmask = create_matrix_Z(ii_feature_pairs, X)
@@ -43,7 +45,8 @@ def main(args):
 
 
     print("Lets Train-----------------------------------")
-    BB, CC = train_higher(XtX, XtXdiag, args.EASER.lambdaBB, ZtZ, ZtZdiag, args.EASER.lambdaCC, CCmask, ZtX, args.EASER.rho, args.EASER.epochs)
+    BB, CC = train_higher(XtX, XtXdiag, args.model_args.lambdaBB, ZtZ, ZtZdiag, 
+                          args.model_args.lambdaCC, CCmask, ZtX, args.model_args.rho, args.model_args.epochs)
     
     print("Saving model...")
     np.save(f'{args.dataset.preprocessing_path}/BB.npy', BB)
@@ -55,8 +58,8 @@ def main(args):
     pred_val = (X).dot(BB) + Z.dot(CC)
     pred_val[X.nonzero()] = -np.inf  
     
-    idx_topk_part = bn.argpartition(-pred_val,  args.EASER.k, axis=1)
-    topk_part = pred_val[np.arange(pred_val.shape[0])[:, np.newaxis], idx_topk_part[:, :args.EASER.k]]
+    idx_topk_part = bn.argpartition(-pred_val,  args.model_args.k, axis=1)
+    topk_part = pred_val[np.arange(pred_val.shape[0])[:, np.newaxis], idx_topk_part[:, :args.model_args.k]]
     idx_part = np.argsort(-topk_part, axis=1)
     top_k_recommendations = idx_topk_part[np.arange(pred_val.shape[0])[:, np.newaxis], idx_part]
 
@@ -77,7 +80,3 @@ def main(args):
 
     recommendation_df.to_csv(f'{args.dataset.output_path}/EASER.csv')
 
-
-if __name__ == '__main__':
-    args = parse_args()
-    main(args)
