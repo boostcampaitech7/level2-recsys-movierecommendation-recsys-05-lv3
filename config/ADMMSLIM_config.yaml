@@ -1,0 +1,10 @@
+model: ADMMSLIM
+
+model_args:
+  ADMMSLIM:
+    lambda_1: 10
+    lambda_2: 100
+    rho: 1000
+    positive: False
+    n_iter: 10
+    verbose: True
