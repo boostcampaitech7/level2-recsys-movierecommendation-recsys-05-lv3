@@ -1,6 +1,6 @@
 import os
 import yaml
-import argparse
+import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader
@@ -37,13 +37,7 @@ def recommend_all_users(model, interaction_matrix, user_mapping, item_mapping, t
     recommendation_df = pd.DataFrame(recommendations, columns=['user', 'item'])
     return recommendation_df
 
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--config', type=str, default='config.yaml', help='Path to the config file')
-    return parser.parse_args()
-
-if __name__ == "__main__":
-    args = parse_args()
+def main(args):
 
     # Load config
     with open(args.config, "r") as file:
