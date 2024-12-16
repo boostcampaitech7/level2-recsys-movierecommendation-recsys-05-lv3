@@ -1,19 +1,14 @@
 import os
+import argparse
+import json
 
 import numpy as np
 import pandas as pd
 from scipy.sparse import csr_matrix
 from sklearn.preprocessing import LabelEncoder
 import torch
-import argparse
-import json
 
 from .model import *
-
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--_lambda',type=int, default=1000)
-    return parser.parse_args()
 
 
 def main(args):
