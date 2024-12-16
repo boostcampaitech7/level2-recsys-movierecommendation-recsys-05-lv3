@@ -8,73 +8,60 @@ from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 from .preprocessing import item2aatributes
 from .datasets import SASRecDataset
 from .models import S3RecModel
+from .pretrain import run_pretrian
 from .trainers import FinetuneTrainer
 from .utils import (
     EarlyStopping,
     check_path,
+    generate_submission_file,
     get_item2attribute_json,
     get_user_seqs,
     set_seed,
 )
 
 
-def main(args):
+def main(config):
 
-    if args.model_args.item_attribute_create :
-        item2aatributes(args)
-    return
-    parser = argparse.ArgumentParser()
+    if not config.model_args.using_pretrain : 
+        config.model = 'SAS'
+    else :
+        config.model = 'S3R'
 
-    parser.add_argument("--data_dir", default="../data/train/", type=str)
-    parser.add_argument("--output_dir", default="output/", type=str)
-    parser.add_argument("--data_name", default="Ml", type=str)
+    if config.model_args.item_attribute_create :
+        item2aatributes(config)
 
+    if config.model_args.create_pretrain :
+        run_pretrian(config)
+    
+    args = argparse.Namespace()
+
+    args.data_dir = config.dataset.data_path
+    args.output_dir = config.dataset.output_path
+    args.data_name = config.model_args.data_name
+    args.preprocessing_path = config.dataset.preprocessing_path + 'SAS/'
+    
     # model args
-    parser.add_argument("--model_name", default="Finetune_full", type=str)
-    parser.add_argument(
-        "--hidden_size", type=int, default=256, help="hidden size of transformer model"
-    )
-    parser.add_argument(
-        "--num_hidden_layers", type=int, default=2, help="number of layers"
-    )
-    parser.add_argument("--num_attention_heads", default=2, type=int)
-    parser.add_argument("--hidden_act", default="gelu", type=str)  # gelu relu
-    parser.add_argument(
-        "--attention_probs_dropout_prob",
-        type=float,
-        default=0.3,
-        help="attention dropout p",
-    )
-    parser.add_argument(
-        "--hidden_dropout_prob", type=float, default=0.5, help="hidden dropout p"
-    )
-    parser.add_argument("--initializer_range", type=float, default=0.02)
-    parser.add_argument("--max_seq_length", default=50, type=int)
-
-    # train args
-    parser.add_argument("--lr", type=float, default=0.0001, help="learning rate of adam")
-    parser.add_argument(
-        "--batch_size", type=int, default=256, help="number of batch_size"
-    )
-    parser.add_argument("--epochs", type=int, default=200, help="number of epochs")
-    parser.add_argument("--no_cuda", action="store_true")
-    parser.add_argument("--log_freq", type=int, default=1, help="per epoch print res")
-    parser.add_argument("--seed", default=42, type=int)
-
-    parser.add_argument(
-        "--weight_decay", type=float, default=0.0, help="weight_decay of adam"
-    )
-    parser.add_argument(
-        "--adam_beta1", type=float, default=0.9, help="adam first beta value"
-    )
-    parser.add_argument(
-        "--adam_beta2", type=float, default=0.999, help="adam second beta value"
-    )
-    parser.add_argument("--gpu_id", type=str, default="0", help="gpu_id")
-
-    parser.add_argument("--using_pretrain", action="store_true")
-
-    args = parser.parse_args()
+    args.model_name = config.model_args.model_name
+    args.hidden_size = config.model_args.hidden_size
+    args.num_hidden_layers = config.model_args.num_hidden_layers
+    args.num_attention_heads = config.model_args.num_attention_heads
+    args.hidden_act = config.model_args.hidden_act
+    args.attention_probs_dropout_prob = config.model_args.attention_probs_dropout_prob
+    args.hidden_dropout_prob = config.model_args.hidden_dropout_prob
+    args.initializer_range = config.model_args.initializer_range
+    args.max_seq_length = config.model_args.max_seq_length
+    args.lr = config.model_args.lr 
+    args.batch_size = config.model_args.batch_size
+    args.epochs = config.model_args.epochs
+    args.no_cuda = config.model_args.no_cuda  
+    args.log_freq = config.model_args.log_freq
+    args.seed = config.model_args.seed
+    args.weight_decay = config.model_args.weight_decay
+    args.adam_beta1 = config.model_args.adam_beta1
+    args.adam_beta2 = config.model_args.adam_beta2
+    args.gpu_id = config.model_args.gpu_id
+    args.using_pretrain = config.model_args.using_pretrain
+    
 
     set_seed(args.seed)
     check_path(args.output_dir)
@@ -83,9 +70,9 @@ def main(args):
     args.cuda_condition = torch.cuda.is_available() and not args.no_cuda
 
     args.data_file = args.data_dir + "train_ratings.csv"
-    item2attribute_file = args.data_dir + args.data_name + "_item2attributes.json"
+    item2attribute_file = args.preprocessing_path + args.data_name + "_item2attributes.json"
 
-    user_seq, max_item, valid_rating_matrix, test_rating_matrix, _ = get_user_seqs(
+    user_seq, max_item, valid_rating_matrix, test_rating_matrix, submission_rating_matrix = get_user_seqs(
         args.data_file
     )
 
@@ -95,12 +82,16 @@ def main(args):
     args.mask_id = max_item + 1
     args.attribute_size = attribute_size + 1
 
+    print(855555555)
+    print(args.attribute_size)
+
     # save model args
     args_str = f"{args.model_name}-{args.data_name}"
     args.log_file = os.path.join(args.output_dir, args_str + ".txt")
-    print(str(args))
+
 
     args.item2attribute = item2attribute
+
     # set item score in train set to `0` in validation
     args.train_matrix = valid_rating_matrix
 
@@ -131,10 +122,11 @@ def main(args):
     trainer = FinetuneTrainer(
         model, train_dataloader, eval_dataloader, test_dataloader, None, args
     )
+    
+    print(111111111111111111111111)
 
-    print(args.using_pretrain)
     if args.using_pretrain:
-        pretrained_path = os.path.join(args.output_dir, "Pretrain.pt")
+        pretrained_path = os.path.join(args.preprocessing_path, "Pretrain.pt")
         try:
             trainer.load(pretrained_path)
             print(f"Load Checkpoint From {pretrained_path}!")
@@ -158,8 +150,46 @@ def main(args):
     trainer.args.train_matrix = test_rating_matrix
     print("---------------Change to test_rating_matrix!-------------------")
     # load the best model
-    trainer.model.load_state_dict(torch.load(args.checkpoint_path))
+    trainer.model.load_state_dict(torch.load(args.checkpoint_path, weights_only=True))
     scores, result_info = trainer.test(0)
-    print(result_info)
 
+
+
+    args.train_matrix = submission_rating_matrix
+    
+    submission_dataset = SASRecDataset(args, user_seq, data_type="submission")
+    submission_sampler = SequentialSampler(submission_dataset)
+    submission_dataloader = DataLoader(
+        submission_dataset, sampler=submission_sampler, batch_size=args.batch_size
+    )
+
+    model = S3RecModel(args=args)
+
+    trainer = FinetuneTrainer(model, None, None, None, submission_dataloader, args)
+
+    trainer.load(args.checkpoint_path)
+    print(f"Load model from {args.checkpoint_path} for submission!")
+    preds = trainer.submission(0)
+
+
+
+
+    checkpoint = args_str + ".pt"
+    args.checkpoint_path = os.path.join(args.output_dir, checkpoint)
+
+    submission_dataset = SASRecDataset(args, user_seq, data_type="submission")
+    submission_sampler = SequentialSampler(submission_dataset)
+    submission_dataloader = DataLoader(
+        submission_dataset, sampler=submission_sampler, batch_size=args.batch_size
+    )
+
+    model = S3RecModel(args=args)
+
+    trainer = FinetuneTrainer(model, None, None, None, submission_dataloader, args)
+
+    trainer.load(args.checkpoint_path)
+    print(f"Load model from {args.checkpoint_path} for submission!")
+    preds = trainer.submission(0)
+
+    generate_submission_file(args.data_file, preds)
 
