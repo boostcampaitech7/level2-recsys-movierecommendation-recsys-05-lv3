@@ -1,6 +1,22 @@
 import torch
 
 class EASE:
+    """
+    B : torch.Tensor 또는 None
+        훈련 후 학습된 행렬 분해 행렬.
+
+    _lambda : float
+        훈련 중에 사용되는 정규화 매개변수.
+
+    device : str
+        계산을 수행할 장치 ('cuda' 또는 'cpu').
+
+    train(X):
+        주어진 입력 행렬 X에 대해 EASE 모델을 훈련합니다.
+    
+    predict(X):
+        훈련된 모델을 사용하여 주어진 입력 행렬 X에 대해 예측을 수행합니다.
+    """
     def __init__(self, _lambda,  device='cuda' if torch.cuda.is_available() else 'cpu'):
         self.B = None
         self._lambda = _lambda
