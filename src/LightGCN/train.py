@@ -2,8 +2,8 @@ import torch
 from torch.cuda.amp import GradScaler, autocast
 import pandas as pd
 import os
-from model import LightGCN
-from utils import create_adj_matrix, TrainDataset
+from .model import LightGCN
+from .utils import create_adj_matrix, TrainDataset
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 

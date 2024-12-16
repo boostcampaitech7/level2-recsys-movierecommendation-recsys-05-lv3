@@ -4,7 +4,7 @@ import os
 
 def preprocess_data(data_path, preprocessing_path, test_size=0.2, random_state=42):
     # 데이터 로드
-    df = pd.read_csv(os.path.join(data_path, 'train_ratings.csv'))
+    df = pd.read_csv(data_path)
     
     # 시간 컬럼 제거 (필요없는 경우)
     df = df.drop('time', axis=1)
@@ -18,7 +18,7 @@ def preprocess_data(data_path, preprocessing_path, test_size=0.2, random_state=4
     df['item'] = df['item'].map(item_id_map)
     
     # 데이터 분할 (train용)
-    train_data, val_data = train_test_split(df, test_size, stratify=df['user'], random_state=random_state)
+    train_data, val_data = train_test_split(df, test_size=test_size, random_state=random_state, stratify=df['user'])
     
     # 출력 디렉토리 생성
     os.makedirs(preprocessing_path, exist_ok=True)
