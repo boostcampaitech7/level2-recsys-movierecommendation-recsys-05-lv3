@@ -21,6 +21,13 @@ from .utils import (
 
 
 def main(config):
+    """
+    모델을 실행시킵니다.
+    using pretrain이 사용하면 S3R 모델, 사용하지않으면 SAS
+    item_attribute_create가 True면 아이템 속성 파일을 만듭니다.
+    create_pretrain을 하면 pretrain 파일을 만듭니다.
+    그 다음 모델을 진행시킵니다.
+    """
 
     if not config.model_args.using_pretrain : 
         config.model = 'SAS'

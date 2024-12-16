@@ -62,7 +62,6 @@ def main(args):
             result.append((user_id, item_id))
 
     pro_dir = os.path.join(f'{args.dataset.save_path}')
-    
     if not os.path.exists(pro_dir):
         os.makedirs(pro_dir)
 

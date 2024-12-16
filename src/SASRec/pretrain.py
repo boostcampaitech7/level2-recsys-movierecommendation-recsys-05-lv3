@@ -18,6 +18,9 @@ from .utils import (
 
 
 def run_pretrian(config):
+    """
+    변수로 pretrain 파일을 만들어냅니다.
+    """
 
     args = argparse.Namespace()
     args.data_dir = config.dataset.data_path
