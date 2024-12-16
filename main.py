@@ -41,7 +41,7 @@ if __name__ == "__main__":
         help='Configuration 파일을 설정합니다.', default="./config/model_config.yaml")
     arg('--model', '-m', '--m', type=str, 
         
-        choices=['EASE','EASER','RecVAE','FM',"RecVAE"],
+        choices=['EASE','EASER','RecVAE','FM',"RecVAE",'SAS'],
         help='학습 및 예측할 모델을 선택할 수 있습니다.')
     arg('--device', '-d', '--d', type=str, 
         choices=['cuda', 'cpu', 'mps'], help='사용할 디바이스를 선택할 수 있습니다.')
@@ -57,9 +57,13 @@ if __name__ == "__main__":
     config_args = OmegaConf.create(vars(args))
     config_yaml = OmegaConf.load(args.config) if args.config else OmegaConf.create()
 
-        
+
+    if config_args.model :
+        config_yaml.model = config_args.model
+
+
     if hasattr(config_yaml, 'model_args') and hasattr(config_yaml.model_args, config_yaml.model):
-        config_yaml.model_args = config_yaml.model_args[config_args.model]
+        config_yaml.model_args = config_yaml.model_args[config_yaml.model]
     else:
         raise ValueError(f"Invalid model specified or missing model_args for '{config_yaml.model}'.")
 
