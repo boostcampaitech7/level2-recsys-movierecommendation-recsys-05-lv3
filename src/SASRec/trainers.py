@@ -80,8 +80,8 @@ class Trainer:
         self.model.to(self.device)
 
     def load(self, file_name):
-        self.model.load_state_dict(torch.load(file_name))
-
+        self.model.load_state_dict(torch.load(file_name, weights_only=True))
+        
     def cross_entropy(self, seq_out, pos_ids, neg_ids):
         # [batch seq_len hidden_size]
         pos_emb = self.model.item_embeddings(pos_ids)
