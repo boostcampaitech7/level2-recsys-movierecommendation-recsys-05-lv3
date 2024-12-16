@@ -37,6 +37,7 @@ def main(args):
 
 
     model = EASE(args.model_args._lambda)
+
     print("Lets Data-----------------------------------")
     model.train(rating_matrix)
 
@@ -52,7 +53,6 @@ def main(args):
         top_n_indices_sorted = top_n_indices[np.argsort(user_predictions[top_n_indices])[::-1]]
         top_n_items_per_user.append(top_n_indices_sorted)
 
-
     index_to_item = {index: item for item, index in item_to_index.items()}
     top_n_items_per_user_ids = [[index_to_item[idx] for idx in user_items] for user_items in top_n_items_per_user]
 
@@ -62,8 +62,10 @@ def main(args):
             result.append((user_id, item_id))
 
     pro_dir = os.path.join(f'{args.dataset.save_path}')
+    
     if not os.path.exists(pro_dir):
         os.makedirs(pro_dir)
+
     submission_df = pd.DataFrame(result, columns=['user', 'item'])
     submission_df.to_csv(f'{args.dataset.save_path}/EASE.csv', index=False)
 
