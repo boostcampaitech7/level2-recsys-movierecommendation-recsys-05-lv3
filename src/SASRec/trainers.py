@@ -4,7 +4,7 @@ import torch.nn as nn
 import tqdm
 from torch.optim import Adam
 
-from utils import ndcg_k, recall_at_k
+from .utils import ndcg_k, recall_at_k
 
 
 class Trainer:
@@ -65,7 +65,7 @@ class Trainer:
             recall.append(recall_at_k(answers, pred_list, k))
             ndcg.append(ndcg_k(answers, pred_list, k))
         post_fix = {
-            "Epoch": epoch,
+            "Epoch": epoch + 1,
             "RECALL@5": "{:.4f}".format(recall[0]),
             "NDCG@5": "{:.4f}".format(ndcg[0]),
             "RECALL@10": "{:.4f}".format(recall[1]),
@@ -80,8 +80,7 @@ class Trainer:
         self.model.to(self.device)
 
     def load(self, file_name):
-        self.model.load_state_dict(torch.load(file_name))
-
+        self.model.load_state_dict(torch.load(file_name, weights_only=True))
     def cross_entropy(self, seq_out, pos_ids, neg_ids):
         # [batch seq_len hidden_size]
         pos_emb = self.model.item_embeddings(pos_ids)
@@ -140,7 +139,7 @@ class PretrainTrainer(Trainer):
 
         pretrain_data_iter = tqdm.tqdm(
             enumerate(pretrain_dataloader),
-            desc=f"{self.args.model_name}-{self.args.data_name} Epoch:{epoch}",
+            desc=f"{self.args.model_name}-{self.args.data_name} Epoch:{epoch + 1}",
             total=len(pretrain_dataloader),
             bar_format="{l_bar}{r_bar}",
         )
@@ -192,7 +191,7 @@ class PretrainTrainer(Trainer):
 
         num = len(pretrain_data_iter) * self.args.pre_batch_size
         losses = {
-            "epoch": epoch,
+            "epoch": epoch + 1,
             "aap_loss_avg": aap_loss_avg / num,
             "mip_loss_avg": mip_loss_avg / num,
             "map_loss_avg": map_loss_avg / num,
@@ -228,7 +227,7 @@ class FinetuneTrainer(Trainer):
 
         rec_data_iter = tqdm.tqdm(
             enumerate(dataloader),
-            desc="Recommendation EP_%s:%d" % (mode, epoch),
+            desc="Recommendation EP_%s:%d" % (mode, epoch + 1),
             total=len(dataloader),
             bar_format="{l_bar}{r_bar}",
         )
@@ -252,7 +251,7 @@ class FinetuneTrainer(Trainer):
                 rec_cur_loss = loss.item()
 
             post_fix = {
-                "epoch": epoch,
+                "epoch": epoch + 1,
                 "rec_avg_loss": "{:.4f}".format(rec_avg_loss / len(rec_data_iter)),
                 "rec_cur_loss": "{:.4f}".format(rec_cur_loss),
             }

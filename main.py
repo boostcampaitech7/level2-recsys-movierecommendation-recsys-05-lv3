@@ -1,9 +1,8 @@
 import argparse
-import ast
-from omegaconf import OmegaConf
-import sys
 import importlib
+import sys
 
+from omegaconf import OmegaConf
 
 def main(args):
     print(f'--------------- INIT {args.model} ---------------')
@@ -13,12 +12,6 @@ def main(args):
     module = importlib.import_module(model_path)
     model = getattr(module, 'main')
     model(args)
-    print('test')
-
-
-    # subprocess.run([
-    #     'python', 'src/{args.model_args}/run.py', args
-    # ])
 
     ######################## SAVE PREDICT
     print(f'--------------- SAVE {args.model} PREDICT ---------------')
@@ -60,7 +53,6 @@ if __name__ == "__main__":
 
     if config_args.model :
         config_yaml.model = config_args.model
-
 
     if hasattr(config_yaml, 'model_args') and hasattr(config_yaml.model_args, config_yaml.model):
         config_yaml.model_args = config_yaml.model_args[config_yaml.model]
