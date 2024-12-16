@@ -1,7 +1,25 @@
 import torch
 import numpy as np
+import pandas as pd
 import scipy.sparse as sp
 from torch.utils.data import Dataset, DataLoader
+
+class TrainDataset(Dataset):
+    def __init__(self, df, num_items):
+        self.users = df['user'].values
+        self.pos_items = df['item'].values
+        self.num_items = num_items
+
+    def __len__(self):
+        return len(self.users)
+
+    def __getitem__(self, idx):
+        user = self.users[idx]
+        pos_item = self.pos_items[idx]
+        neg_item = np.random.randint(self.num_items)
+        while neg_item in self.pos_items[self.users == user]:
+            neg_item = np.random.randint(self.num_items)
+        return user, pos_item, neg_item
 
 def create_adj_matrix(df, num_users, num_items):
     user_nodes = df['user'].values
@@ -23,34 +41,20 @@ def create_adj_matrix(df, num_users, num_items):
         torch.Size(norm_adj.shape)
     )
 
-class TrainDataset(Dataset):
-    def __init__(self, df, num_items):
-        self.users = df['user'].values
-        self.pos_items = df['item'].values
-        self.num_items = num_items
-
-    def __len__(self):
-        return len(self.users)
-
-    def __getitem__(self, idx):
-        user = self.users[idx]
-        pos_item = self.pos_items[idx]
-        neg_item = np.random.randint(self.num_items)
-        while neg_item in self.pos_items[self.users == user]:
-            neg_item = np.random.randint(self.num_items)
-        return user, pos_item, neg_item
+def create_submission(recommendations, user_id_map, item_id_map, output_path):
+    users = []
+    items = []
     
-def calculate_recall_at_k(predictions, ground_truth, k):
-    recalls = []
-    for user in ground_truth:
-        if user not in predictions:
-            continue
-        pred_items = predictions[user][:k]
-        gt_items = ground_truth[user]
-        n_rel = len(gt_items)
-        if n_rel == 0:
-            continue
-        n_rel_and_rec_k = len(set(pred_items) & gt_items)
-        recall = n_rel_and_rec_k / min(k, n_rel)
-        recalls.append(recall)
-    return np.mean(recalls)
+    original_user_ids = user_id_map['original_id'].tolist()
+    original_item_ids = item_id_map['original_id'].tolist()
+    
+    for user, rec_items in recommendations.items():
+        users.extend([original_user_ids[user]] * 10)
+        items.extend([original_item_ids[item] for item in rec_items])
+    
+    submission_df = pd.DataFrame({
+        'user': users,
+        'item': items
+    })
+    
+    submission_df.to_csv(output_path, index=False)
