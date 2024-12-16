@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 from torch import nn
 from tqdm import tqdm
 
-class Text_Dataset(Dataset):
+class TextDataset(Dataset):
     def __init__(self, feature_vectors, rating=None):
         self.feature_vectors = np.stack(feature_vectors)
         self.rating = rating
@@ -194,13 +194,13 @@ def data_loader(data, batch_size, shuffle, valid_ratio=0.1):
 
     train_features = data['X_train']['feature_vectors']
     train_ratings = data['y_train'].values
-    train_dataset = Text_Dataset(train_features, train_ratings)
+    train_dataset = TextDataset(train_features, train_ratings)
 
     valid_dataset = None
     if valid_ratio != 0:
         valid_features = data['X_valid']['feature_vectors']
         valid_ratings = data['y_valid'].values
-        valid_dataset = Text_Dataset(valid_features, valid_ratings)
+        valid_dataset = TextDataset(valid_features, valid_ratings)
 
     train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=shuffle)
     valid_dataloader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=False) if valid_ratio else None
