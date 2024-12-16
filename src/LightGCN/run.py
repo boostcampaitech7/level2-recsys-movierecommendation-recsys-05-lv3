@@ -54,7 +54,3 @@ def main(args):
     submission_path = os.path.join(args.dataset.output_path, f"{model_name}_submission.csv")
     create_submission(recommendations, user_id_map, item_id_map, submission_path)
     print(f"Submission file created: {submission_path}")
-
-if __name__ == "__main__":
-    args = 
-    main(args)
