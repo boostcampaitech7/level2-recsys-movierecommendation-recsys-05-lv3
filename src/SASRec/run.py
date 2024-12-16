@@ -86,7 +86,7 @@ def main(config):
 
     # save model args
     args_str = f"{args.model_name}-{args.data_name}"
-    args.log_file = os.path.join(args.output_dir, args_str + ".txt")
+    args.log_file = os.path.join(args.preprocessing_path, args_str + ".txt")
 
     args.item2attribute = item2attribute
 
@@ -95,7 +95,7 @@ def main(config):
 
     # save model
     checkpoint = args_str + ".pt"
-    args.checkpoint_path = os.path.join(args.output_dir, checkpoint)
+    args.checkpoint_path = os.path.join(args.preprocessing_path, checkpoint)
 
     train_dataset = SASRecDataset(args, user_seq, data_type="train")
     train_sampler = RandomSampler(train_dataset)
@@ -145,7 +145,7 @@ def main(config):
 
     print("---------------Change to test_rating_matrix!-------------------")
     trainer.args.train_matrix = test_rating_matrix
-    
+
     # load the best model
     trainer.model.load_state_dict(torch.load(args.checkpoint_path, weights_only=True))
 
