@@ -61,5 +61,4 @@ def item2aatributes(args):
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
         # 최종 JSON 저장
-        tmp.set_index('item')['combined'].to_json(f"{output_dir}/Ml_item2attributes1.json")
-        print(1111111)
+        tmp.set_index('item')['combined'].to_json(f"{output_dir}/Ml_item2attributes.json")
