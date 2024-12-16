@@ -227,7 +227,7 @@ class FinetuneTrainer(Trainer):
 
         rec_data_iter = tqdm.tqdm(
             enumerate(dataloader),
-            desc="Recommendation EP_%s:%d" % (mode, epoch),
+            desc="Recommendation EP_%s:%d" % (mode, epoch + 1),
             total=len(dataloader),
             bar_format="{l_bar}{r_bar}",
         )
