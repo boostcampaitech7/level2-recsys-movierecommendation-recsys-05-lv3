@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 
-from .preprocessing import item2aatributes
+from .preprocessing import item2attributes
 from .datasets import SASRecDataset
 from .models import S3RecModel
 from .pretrain import run_pretrian
@@ -28,7 +28,7 @@ def main(config):
         config.model = 'S3R'
 
     if config.model_args.item_attribute_create :
-        item2aatributes(config)
+        item2attributes(config)
 
     if config.model_args.create_pretrain :
         run_pretrian(config)
