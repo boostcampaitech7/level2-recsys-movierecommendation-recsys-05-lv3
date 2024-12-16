@@ -7,8 +7,11 @@ from .inference import generate_recommendations
 
 def main(args):
     # 데이터 경로 설정
+    # 나중에 고치기 
     base_dir = os.path.dirname(os.path.abspath(__file__))
     data_path = os.path.join(base_dir, args.dataset.data_path)
+    data_path = args.dataset.data_path
+    print(args.dataset.data_path)
     # 데이터 로드 및 전처리
     train_df, user_item_matrix, user_encoder, item_encoder = load_and_preprocess_data(data_path)
 

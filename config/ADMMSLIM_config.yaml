@@ -8,3 +8,11 @@ model_args:
     positive: False
     n_iter: 10
     verbose: True
+
+
+
+
+dataset :
+  data_path : ../train/
+  output_path : saved/output
+  preprocessing_path : saved/preprocessed/
