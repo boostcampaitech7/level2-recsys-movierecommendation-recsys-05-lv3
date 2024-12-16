@@ -35,13 +35,21 @@ def main(config):
     
     args = argparse.Namespace()
 
+    # model info
     args.model = config.model 
-
-    args.data_dir = config.dataset.data_path
-    args.output_dir = config.dataset.output_path
     args.data_name = config.model_args.data_name
+
+    # model path
+    args.data_dir = config.dataset.data_path
     args.preprocessing_path = config.dataset.preprocessing_path + 'SAS/'
-    
+    args.output_dir = config.dataset.output_path
+
+    args.seed = config.model_args.seed
+    args.log_freq = config.model_args.log_freq
+    args.gpu_id = config.model_args.gpu_id
+    args.no_cuda = config.model_args.no_cuda 
+    args.using_pretrain = config.model_args.using_pretrain
+
     # model args
     args.model_name = config.model_args.model_name
     args.hidden_size = config.model_args.hidden_size
@@ -51,19 +59,15 @@ def main(config):
     args.attention_probs_dropout_prob = config.model_args.attention_probs_dropout_prob
     args.hidden_dropout_prob = config.model_args.hidden_dropout_prob
     args.initializer_range = config.model_args.initializer_range
-    args.max_seq_length = config.model_args.max_seq_length
-    args.lr = config.model_args.lr 
-    args.batch_size = config.model_args.batch_size
-    args.epochs = config.model_args.epochs
-    args.no_cuda = config.model_args.no_cuda  
-    args.log_freq = config.model_args.log_freq
-    args.seed = config.model_args.seed
+    args.max_seq_length = config.model_args.max_seq_lengthhs
     args.weight_decay = config.model_args.weight_decay
     args.adam_beta1 = config.model_args.adam_beta1
     args.adam_beta2 = config.model_args.adam_beta2
-    args.gpu_id = config.model_args.gpu_id
-    args.using_pretrain = config.model_args.using_pretrain
     
+    # train
+    args.lr = config.model_args.lr 
+    args.batch_size = config.model_args.batch_size
+    args.epochs = config.model_args.epoc
 
     set_seed(args.seed)
     check_path(args.output_dir)
@@ -87,7 +91,6 @@ def main(config):
     # save model args
     args_str = f"{args.model_name}-{args.data_name}"
     args.log_file = os.path.join(args.preprocessing_path, args_str + ".txt")
-
     args.item2attribute = item2attribute
 
     # set item score in train set to `0` in validation
