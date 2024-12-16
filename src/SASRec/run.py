@@ -35,6 +35,8 @@ def main(config):
     
     args = argparse.Namespace()
 
+    args.model = config.model 
+
     args.data_dir = config.dataset.data_path
     args.output_dir = config.dataset.output_path
     args.data_name = config.model_args.data_name
@@ -141,13 +143,12 @@ def main(config):
             print("Early stopping")
             break
 
-    trainer.args.train_matrix = test_rating_matrix
     print("---------------Change to test_rating_matrix!-------------------")
+    trainer.args.train_matrix = test_rating_matrix
+    
     # load the best model
     trainer.model.load_state_dict(torch.load(args.checkpoint_path, weights_only=True))
 
-    args.train_matrix = submission_rating_matrix
-    
     submission_dataset = SASRecDataset(args, user_seq, data_type="submission")
     submission_sampler = SequentialSampler(submission_dataset)
     submission_dataloader = DataLoader(
@@ -159,25 +160,9 @@ def main(config):
     trainer = FinetuneTrainer(model, None, None, None, submission_dataloader, args)
 
     trainer.load(args.checkpoint_path)
+
     print(f"Load model from {args.checkpoint_path} for submission!")
     preds = trainer.submission(0)
 
-    checkpoint = args_str + ".pt"
-    args.checkpoint_path = os.path.join(args.output_dir, checkpoint)
-
-    submission_dataset = SASRecDataset(args, user_seq, data_type="submission")
-    submission_sampler = SequentialSampler(submission_dataset)
-    submission_dataloader = DataLoader(
-        submission_dataset, sampler=submission_sampler, batch_size=args.batch_size
-    )
-
-    model = S3RecModel(args=args)
-
-    trainer = FinetuneTrainer(model, None, None, None, submission_dataloader, args)
-
-    trainer.load(args.checkpoint_path)
-    print(f"Load model from {args.checkpoint_path} for submission!")
-    preds = trainer.submission(0)
-
-    generate_submission_file(args.data_file, preds)
+    generate_submission_file(args, preds)
 
