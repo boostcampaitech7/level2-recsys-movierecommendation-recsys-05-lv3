@@ -3,7 +3,7 @@ import os
 import pandas as pd
 
 
-def item2aatributes(args):
+def item2attributes(args):
         
         data_path = args.dataset.data_path
         output_dir = f'{args.dataset.preprocessing_path}/SAS/'
