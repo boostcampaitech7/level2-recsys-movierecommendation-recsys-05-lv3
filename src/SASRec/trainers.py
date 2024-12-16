@@ -81,7 +81,7 @@ class Trainer:
 
     def load(self, file_name):
         self.model.load_state_dict(torch.load(file_name, weights_only=True))
-        
+
     def cross_entropy(self, seq_out, pos_ids, neg_ids):
         # [batch seq_len hidden_size]
         pos_emb = self.model.item_embeddings(pos_ids)
@@ -140,7 +140,7 @@ class PretrainTrainer(Trainer):
 
         pretrain_data_iter = tqdm.tqdm(
             enumerate(pretrain_dataloader),
-            desc=f"{self.args.model_name}-{self.args.data_name} Epoch:{epoch}",
+            desc=f"{self.args.model_name}-{self.args.data_name} Epoch:{epoch + 1}",
             total=len(pretrain_dataloader),
             bar_format="{l_bar}{r_bar}",
         )
@@ -192,7 +192,7 @@ class PretrainTrainer(Trainer):
 
         num = len(pretrain_data_iter) * self.args.pre_batch_size
         losses = {
-            "epoch": epoch,
+            "epoch": epoch + 1,
             "aap_loss_avg": aap_loss_avg / num,
             "mip_loss_avg": mip_loss_avg / num,
             "map_loss_avg": map_loss_avg / num,
