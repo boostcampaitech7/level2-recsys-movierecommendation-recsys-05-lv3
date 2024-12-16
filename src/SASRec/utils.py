@@ -164,7 +164,7 @@ def generate_submission_file(args, preds):
             result.append((users[index], item))
 
     pd.DataFrame(result, columns=["user", "item"]).to_csv(
-        f"{args.output_dir}/{args.model_name}.csv", index=False
+        f"{args.output_dir}/{args.model}.csv", index=False
     )
 
 
