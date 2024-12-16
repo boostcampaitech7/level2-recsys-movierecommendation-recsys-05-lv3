@@ -65,7 +65,7 @@ class Trainer:
             recall.append(recall_at_k(answers, pred_list, k))
             ndcg.append(ndcg_k(answers, pred_list, k))
         post_fix = {
-            "Epoch": epoch,
+            "Epoch": epoch + 1,
             "RECALL@5": "{:.4f}".format(recall[0]),
             "NDCG@5": "{:.4f}".format(ndcg[0]),
             "RECALL@10": "{:.4f}".format(recall[1]),
@@ -81,7 +81,6 @@ class Trainer:
 
     def load(self, file_name):
         self.model.load_state_dict(torch.load(file_name, weights_only=True))
-
     def cross_entropy(self, seq_out, pos_ids, neg_ids):
         # [batch seq_len hidden_size]
         pos_emb = self.model.item_embeddings(pos_ids)
@@ -252,7 +251,7 @@ class FinetuneTrainer(Trainer):
                 rec_cur_loss = loss.item()
 
             post_fix = {
-                "epoch": epoch,
+                "epoch": epoch + 1,
                 "rec_avg_loss": "{:.4f}".format(rec_avg_loss / len(rec_data_iter)),
                 "rec_cur_loss": "{:.4f}".format(rec_cur_loss),
             }
