@@ -82,13 +82,9 @@ def main(config):
     args.mask_id = max_item + 1
     args.attribute_size = attribute_size + 1
 
-    print(855555555)
-    print(args.attribute_size)
-
     # save model args
     args_str = f"{args.model_name}-{args.data_name}"
     args.log_file = os.path.join(args.output_dir, args_str + ".txt")
-
 
     args.item2attribute = item2attribute
 
@@ -122,8 +118,6 @@ def main(config):
     trainer = FinetuneTrainer(
         model, train_dataloader, eval_dataloader, test_dataloader, None, args
     )
-    
-    print(111111111111111111111111)
 
     if args.using_pretrain:
         pretrained_path = os.path.join(args.preprocessing_path, "Pretrain.pt")
@@ -151,9 +145,6 @@ def main(config):
     print("---------------Change to test_rating_matrix!-------------------")
     # load the best model
     trainer.model.load_state_dict(torch.load(args.checkpoint_path, weights_only=True))
-    scores, result_info = trainer.test(0)
-
-
 
     args.train_matrix = submission_rating_matrix
     
@@ -170,9 +161,6 @@ def main(config):
     trainer.load(args.checkpoint_path)
     print(f"Load model from {args.checkpoint_path} for submission!")
     preds = trainer.submission(0)
-
-
-
 
     checkpoint = args_str + ".pt"
     args.checkpoint_path = os.path.join(args.output_dir, checkpoint)
