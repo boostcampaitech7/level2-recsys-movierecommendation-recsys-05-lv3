@@ -9,13 +9,8 @@
 
 <br>
 
-## 🏢 Team
 
-### 🗣️ 팀 소개
->**블라블라**
-
-
-### 👨🏼‍💻 Members
+## 👨🏼‍💻 Members
 공지원|김주은|류지훈|박세연|박재현|백상민|
 :-:|:-:|:-:|:-:|:-:|:-:
 <img src='https://avatars.githubusercontent.com/annakong23' height=60 width=60></img>|<img src='https://avatars.githubusercontent.com/kimjueun028' height=60 width=60></img>|<img src='https://avatars.githubusercontent.com/JihoonRyu00' height=60 width=60></img>|<img src='https://avatars.githubusercontent.com/SayOny' height=60 width=60></img>|<img src='https://avatars.githubusercontent.com/JaeHyun11' height=60 width=60></img>|<img src='https://avatars.githubusercontent.com/gagoory7' height=60 width=60></img>|
@@ -35,77 +30,35 @@
   <img src="https://img.shields.io/badge/Slack-4A154B?style=flat-square&logo=Slack&logoColor=white"/>&nbsp;
 
 
-### 🤝 협업 방식
-
-
-<br>
-
-## Pipeline
-
-
 <br>
 
 ## 📁 Directory
 ```bash
-project/
-│
-├── notebook
-│   ├── EAD_jihoon_train.ipynb
-│   ├── EDA_Jaehyun.ipynb
-│   ├── EDA_SM.ipynb
-│   ├── EDA_jihoon_basic.ipynb
-│   ├── EDA_jihoon_merged.ipynb
-│   ├── EDA_jiwon.ipynb
-│   ├── EDA_jueun.ipynb
-│   └── EDA_seyeon.ipynb
+project
+├── README.md
+├── main.py
+├── config/
+│   ├── model_config.yaml
+│   └── model_weights.yaml
+├── data/
+├── notebook/
+├── saved/
+│   ├── output/
+│   └── preprocessed/
 └── src
-    ├── CDAE
-    │   └── CDAE.ipynb
-    ├── DeepFM
-    │   └── DeepFM.ipynb
-    ├── EASE
-    │   ├── README.md
-    │   ├── model.py
-    │   └── run.py
-    ├── EASER
-    │   ├── README.md
-    │   ├── model.py
-    │   ├── preprocessing.py
-    │   └── run.py
-    ├── FM
-    │   └── model.py
-    ├── Light\ GCN
-    │   ├── README.md
-    │   ├── main.py
-    │   ├── model.py
-    │   ├── preprocess.py
-    │   ├── recommendation.py
-    │   ├── train.py
-    │   └── utils.py
-    ├── RecVAE
-    │   ├── README.md
-    │   ├── dataset.py
-    │   ├── model.py
-    │   ├── preprocessing.py
-    │   └── run.py
-    ├── SASRec
-    │   ├── README.md
-    │   ├── datasets.py
-    │   ├── inference.py
-    │   ├── models.py
-    │   ├── modules.py
-    │   ├── preprocessing.py
-    │   ├── run_pretrain.py
-    │   ├── run_train.py
-    │   ├── sample_submission.ipynb
-    │   ├── trainers.py
-    │   └── utils.py
-    ├── ensemble
-    │   ├── README.md
-    │   └── hard_voting.py
-    └── test.py
-
-
+    ├── ADMMSLIM/
+    ├── BERT4Rec/
+    ├── CDAE/
+    ├── DeepFM/
+    ├── EASE/
+    ├── EASER/
+    ├── FM/
+    ├── LightGCN/
+    ├── MultiVAE/
+    ├── NCF/
+    ├── RecVAE/
+    ├── SASRec/
+    └── ensemble/
 ```
 <br>
 
@@ -121,10 +74,10 @@ project/
 ~하려면 다음 명령어를 사용하세요:
 
 ```bash
-
+python main.py -c config/model_args -m Model -p param1 value1 param2 value2 ...
 ```
 
-### Testing
+### Ensemble
 
 ~ 하려면 다음 명령어를 사용하세요:
 ```bash
