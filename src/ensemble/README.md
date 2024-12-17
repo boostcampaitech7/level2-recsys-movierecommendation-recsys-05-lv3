@@ -1,72 +1,29 @@
-
----
-
 ## 🚀 ensemble 사용 방법
 
 ### hard voting
 
-voting을 원하는 모델들의 예측 결과 파일들을 predictions/에 담아주세요.<br>
-파일명 앞에 숫자를 추가해 파일들에 우선순위를 부여하세요.<br>
-예시)
-```
-predictions/
-├── 01_A.csv
-├── 02_D.csv
-├── 03_B.csv
-└── 04_C.csv
-```
-아이템이 같은 추천수를 가질 때 우선순위가 높은 csv에 있는 아이템을 우선적으로 추천합니다.<br>
-이후 아래 명령을 실행하세요.
+'../../config/model_weights.yaml'을 수정하여 앙상블 output 파일을 생성합니다.<br><br>
+'id'의 value를 수정하여 파일 저장명을 설정할 수 있습니다. ('final_recommendations_{id}.csv'로 저장됩니다.)<br><br>
+'output_dir'의 value를 수정하여 파일 저장 경로를 설정할 수 있습니다. <br><br>
+'model_weights' 에는 각 모델명이 value로 존재합니다.<br>
+'model_weights' 내부에서 모델의 순서를 바꿔 같은 가중치일 때의 우선순위를 설정할 수 있습니다.<br>
+위쪽에 위치할수록 더 높은 우선순위를 갖습니다.<br>
+각 모델 내부의 key의 value들을 수정할 수 있습니다.<br>
+- 'use'의 value를 수정하여 해당 모델의 output의 사용여부를 설정합니다.<br>
+- 'file'의 value를 수정하여 해당 모델의 파일명을 설정합니다.<br>
+- 'weight'의 value를 수정하여 해당 모델의 가중치를 설정합니다.<br>
+
+
+아래 명령을 실행하세요.
 
 ```bash
 python hard_voting.py
 ```
 
-모든 파일에 동일한 가중치를 적용할지를 선택하세요.<br>
-```bash
-모든 파일에 동일한 가중치를 적용하시겠습니까? (y/n): 
-```
-서로 다른 가중치를 적용하게 된다면 파일 별 가중치를 입력하게 됩니다.<br>
-각 파일에 대한 가중치는 전체 파일에 대해 엽력된 가중치의 합에 대한 비율로 적용됩니다.
-```bash
-파일: 01_A.csv
-01_A.csv의 가중치를 입력하세요:
-```
 
-최종 예측 출력(.csv)과 해당 예측에 사용된 가중치 정보(.json)는 finals에 저장됩니다.
+최종 예측 출력(.csv)과 해당 예측에 사용된 가중치 정보(.log)는 'output_dir'에 저장됩니다.
 ```
-finals/
-├── {timestamp}.csv             # 최종 예측 파일
-└── {timestamp}_weights.json    # 예측할 때 사용된 파일별 가중치 정보    
+output_dir/
+├── final_recommendations_{id}.csv              # 최종 예측 파일
+└── final_recommendations_{experiment_id}.log   # 예측할 때 사용된 파일별 가중치 정보    
 ```
-
-```json
-# File: {timestamp}_weights.json
-
-{
-    "original_weights": {
-        "01_A.csv": 1.0,
-        "02_D.csv": 1.0,
-        "03_B.csv": 1.0,
-        "04_C.csv": 2.0
-    },
-    "weight_ratios": {
-        "01_A.csv": 20.0,
-        "02_D.csv": 20.0,
-        "03_B.csv": 20.0,
-        "04_C.csv": 40.0
-    }
-}
-```
-
-
-## 📂 디렉토리 구조
-
-```
-ensemble/
-├── finals/         # 최종 예측 파일이 담기는 곳
-├── predictions/    # 개별 모델들의 예측 결과를 담아두는 곳
-├── hard_voting.py  # 하드 보팅 수행하기 위한 파일
-└── README.md       
-```
-
