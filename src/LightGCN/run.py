@@ -7,6 +7,29 @@ from .preprocess import preprocess_data
 
 
 def main(args):
+    """
+    LightGCN 모델의 전체 실행 과정을 관리하는 메인 함수입니다.
+
+    이 함수는 다음과 같은 단계를 수행합니다:
+    1. 필요한 경우 데이터 전처리
+    2. 전처리된 데이터 로드
+    3. LightGCN 모델 학습
+    4. 사용자별 추천 생성
+    5. 추천 결과를 CSV 파일로 저장
+
+    매개변수:
+    args: 실행에 필요한 모든 설정을 포함하는 객체
+        - model_args: 모델 관련 인자
+        - dataset: 데이터셋 관련 경로 정보
+
+    주요 처리 과정:
+    - 전처리 여부 확인 및 실행
+    - 데이터 로드 및 분할 설정
+    - 모델 학습 및 추천 생성
+    - 결과 파일 생성
+
+    이 함수는 별도의 반환값이 없으며, 처리 결과를 파일로 저장합니다.
+    """
     model_args=args.model_args
     # 전처리 수행
     if not model_args.preprocessed:
