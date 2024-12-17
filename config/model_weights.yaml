@@ -1,0 +1,50 @@
+output_dir: "saved/output"
+model_weights:
+  ADMMSLIM:
+    use: true
+    file: "ADMMSLIM_output.csv"
+    weight: 0.1
+  BERT4Rec:
+    use: true
+    file: "BERT4Rec_output.csv"
+    weight: 0.1
+  CDAE:
+    use: true
+    file: "CDAE_output.csv"
+    weight: 0.1
+  DeepFM:
+    use: true
+    file: "DeepFM_output.csv"
+    weight: 0.1
+  EASE:
+    use: true
+    file: "EASE_output.csv"
+    weight: 0.1
+  EASER:
+    use: true
+    file: "EASER_output.csv"
+    weight: 0.1
+  FM:
+    use: true
+    file: "FM_output.csv"
+    weight: 0.1
+  LightGCN:
+    use: true
+    file: "LightGCN_output.csv"
+    weight: 0.1
+  MultiVAE:
+    use: true
+    file: "MultiVAE_output.csv"
+    weight: 0.1
+  NCF:
+    use: true
+    file: "NCF_output.csv"
+    weight: 0.1
+  RecVAE:
+    use: true
+    file: "RecVAE_output.csv"
+    weight: 0.1
+  SASRec:
+    use: true
+    file: "SASRec_output.csv"
+    weight: 0.1
