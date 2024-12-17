@@ -5,11 +5,44 @@ model: EASE
 
 
 model_args:
+  ADMMSLIM:
+    lambda_1: 10
+    lambda_2: 100
+    rho: 1000
+    positive: False
+    n_iter: 10
+    verbose: True
+
+  BERT4Rec:
+    num_epochs: 1
+    batch_size: 1024
+    lr: 1e-3
+    mask_prob: 0.15
+    max_len: 50
+    hidden_units: 50
+    num_heads: 1
+    num_layers: 2
+    dropout_rate: 0.5
+    num_workers: 1
+    
+  CDAE:
+    embedding_dim: 128
+    epochs: 10
+    batch_size: 128
+    lr: 0.001
+    k: 10
+    
+  DeepFM:
+    embedding_dim: 32
+    mlp_dims: [64, 32, 16]
+    drop_rate: 0.1
+    learning_rate: 0.001
+    epochs: 10
+    batch_size: 64
+    num_negatives: 10
+
   EASE:
     _lambda : 1000
-    
-  SASRec:
-    Create : False
 
   EASER:
     create: True
@@ -19,6 +52,38 @@ model_args:
     lambdaCC: 10000
     rho: 50000
     k: 10
+
+  FM:
+    seed: 0
+    batch_size: 4096
+    epochs: 1
+    embed_dim: 1
+    learning_rate: 0.01
+    weight_decay: 1e-4
+    valid_ratio: 0.1
+    shuffle: True
+
+  LightGCN:
+    n_layers: 3
+    embedding_dim: 128
+    batch_size: 2048
+    n_epochs: 100
+    patience: 5
+    learning_rate: 0.00001
+    test_size: 0.2
+    random_state: 42
+    preprocessed: False
+    data_split: False
+    top_k: 10
+
+  NCF:
+    embed_dim: 16
+    hidden_dim: 64
+    epochs: 10
+    lr: 0.001
+    batch_size: 64
+    num_negatives: 4
+    top_k: 10
 
   RecVAE:
     create: True
@@ -36,18 +101,40 @@ model_args:
     min_users_per_item: 1
     min_items_per_user: 0
 
-  FM:
-      seed: 0
-      batch_size: 4096
-      epochs: 1
-      embed_dim: 1
-      learning_rate: 0.01
-      weight_decay: 1e-4
-      valid_ratio: 0.1
-      shuffle: True
+  SASRec:
+    item_attribute_create : True
+    data_name : M1
+    model_name : Finetune_full
+    using_pretrain : store_true
+    create_pretrain: False
+    seed : 42
+    gpu_id : '0'
+    no_cuda : store_true
+    log_freq : 1
+    pre_epochs: 300
+    pre_batch_size: 512
+    maks_p: 0.2
+    aap_weight: 0.2
+    mip_weight: 1.0
+    map_weight: 1.0
+    sp_weight: 1.0
+    hidden-size : 256
+    num_hidden_layers : 2
+    num_attention_heads : 2
+    hidden-act : gelu
+    attention_probs_dropout_prob : 0.3
+    hidden-dropout_prob : 0.5
+    initializer_range : 0.02
+    max_seq_length : 50
+    weight_decay : 0.02
+    adam_beta1 : 0.9
+    adam_beta2 : 0.999
+    lr : 0.0001
+    batch_size : 256
+    epochs : 200
 
 
 dataset :
-  data_path : ../train/
+  data_path : data/train/
   output_path : saved/output
   preprocessing_path : saved/preprocessed/
