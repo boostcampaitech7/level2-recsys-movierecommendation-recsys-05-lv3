@@ -24,7 +24,6 @@ if __name__ == "__main__":
 
     ######################## BASIC ENVIRONMENT SETUP
     parser = argparse.ArgumentParser(description='parser')
-    
 
     arg = parser.add_argument
     str2dict = lambda x: {k:int(v) for k,v in (i.split(':') for i in x.split(','))}
@@ -33,18 +32,15 @@ if __name__ == "__main__":
     arg('--config', '-c', '--c', type=str, 
         help='Configuration 파일을 설정합니다.', default="./config/model_config.yaml")
     arg('--model', '-m', '--m', type=str, 
-        
-        choices=['EASE','EASER','RecVAE','FM',"RecVAE",'SAS', 'ADMMSLIM'],
+        choices=['ADMMSLIM', 'BERT4Rec', 'CDAE', 'DeepFM', 'EASE',
+                  'EASER', 'FM', 'LightGCN', 'MultiVAE', 'NCF', 'SASRec'],
         help='학습 및 예측할 모델을 선택할 수 있습니다.')
     arg('--device', '-d', '--d', type=str, 
         choices=['cuda', 'cpu', 'mps'], help='사용할 디바이스를 선택할 수 있습니다.')
-
     arg('--params', '-p', type=str, nargs='*',
         help="Override할 파라미터를 문자열로 입력해주세요.")
 
-
     args = parser.parse_args()
-
     
     ######################## Config with yaml
     config_args = OmegaConf.create(vars(args))
@@ -83,8 +79,7 @@ if __name__ == "__main__":
                 value = int(value)  # 숫자라면 int로 변환
             # 아니면 그대로 문자열로 처리
             result_dict[key] = value
-            
-        
+
     except ValueError as e:
         print(e)
         sys.exit(1)
@@ -99,8 +94,6 @@ if __name__ == "__main__":
         
     for x in result_dict.keys() :
         config_yaml.model_args[x] = result_dict[x]
-
-
 
     # Configuration 콘솔에 출력
     print(OmegaConf.to_yaml(config_yaml))
