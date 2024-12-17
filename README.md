@@ -63,25 +63,34 @@ project
 <br>
 
 # 🏃 How to run
-## Requirements
-~하려면 다음 명령어를 사용하세요:
+## Config
+
+model_config.yaml
+
 ```bash
+seed : 0
+device: cpu # 장치 설정
+model: EASE # 기본 모델
+
+
+model_args:
+  모델명:
+    파라미터1:
+    파라미터2:
+
+dataset :
+  data_path : data/train/ # 학습 데이터 불러오는 곳
+  output_path : saved/output # 예측한 결과 저장할 곳
+  preprocessing_path : saved/preprocessed/ # 전처리된 파일이 저장될 곳
+
 ```
 
-## 학습 및 예측
+## 전처리 & 학습 & 예측
 ### Training
 
-~하려면 다음 명령어를 사용하세요:
+전처리 & 학습 & 예측을 동시에 하려면 다음 명령어를 사용하세요:
 
 ```bash
 python main.py -c config/model_args -m Model -p param1 value1 param2 value2 ...
 ```
 
-### Ensemble
-
-~ 하려면 다음 명령어를 사용하세요:
-```bash
-
-```
-
-<br>
