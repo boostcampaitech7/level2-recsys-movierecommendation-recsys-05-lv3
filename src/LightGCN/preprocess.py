@@ -3,6 +3,30 @@ from sklearn.model_selection import train_test_split
 import os
 
 def preprocess_data(data_path, preprocessing_path, test_size=0.2, random_state=42):
+    """
+    주어진 데이터를 전처리하고 훈련 및 검증 데이터셋으로 분할합니다.
+
+    매개변수:
+    data_path (str): 원본 데이터 파일의 경로
+    preprocessing_path (str): 전처리된 데이터를 저장할 경로
+    test_size (float): 검증 데이터셋의 비율 (기본값: 0.2)
+    random_state (int): 랜덤 시드 값 (기본값: 42)
+
+    처리 과정:
+    1. CSV 파일에서 데이터를 로드합니다.
+    2. 'time' 열을 제거합니다.
+    3. 사용자와 아이템 ID를 연속된 정수로 매핑합니다.
+    4. 데이터를 훈련셋과 검증셋으로 분할합니다.
+    5. 전처리된 데이터와 ID 매핑 정보를 저장합니다.
+    6. 데이터 통계를 출력합니다.
+
+    반환값:
+    tuple: (train_data, val_data, user_id_map, item_id_map)
+        - train_data (pd.DataFrame): 훈련 데이터셋
+        - val_data (pd.DataFrame): 검증 데이터셋
+        - user_id_map (dict): 원본 사용자 ID와 매핑된 ID의 딕셔너리
+        - item_id_map (dict): 원본 아이템 ID와 매핑된 ID의 딕셔너리
+    """
     # 데이터 로드
     df = pd.read_csv(data_path)
     
