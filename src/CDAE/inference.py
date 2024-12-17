@@ -2,7 +2,19 @@ import torch
 from tqdm import tqdm
 
 def recommend_top_k(model, final_data, num_users, k=10, device='cuda'):
+    """
+    주어진 모델을 사용하여 각 사용자에 대해 상위 k개의 추천 항목을 반환합니다.
 
+    Args:
+        model: 추천 모델 객체.
+        final_data: 사용자-아이템 상호작용 데이터프레임.
+        num_users: 총 사용자 수.
+        k: 추천할 항목의 수.
+        device: 모델을 실행할 장치 ('cuda' 또는 'cpu').
+
+    Returns:
+        dict: 사용자 ID를 키로 하고 추천된 아이템 ID 목록을 값으로 가지는 딕셔너리.
+    """
     model.eval()
     model.to(device)
     all_recommendations = {}
