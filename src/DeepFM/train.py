@@ -4,6 +4,18 @@ from tqdm import tqdm
 from torch.utils.data import Dataset
 
 class PairwiseRecommendationDataset(Dataset):
+    """
+    사용자-아이템 쌍을 위한 데이터셋 클래스.
+
+    Attributes:
+        user_col: 사용자 ID 텐서.
+        item_col: 아이템 ID 텐서.
+        user_item_dict: 사용자별 시청한 아이템 딕셔너리.
+        all_items: 전체 아이템 리스트.
+        item_probs: 아이템 샘플링 확률.
+        num_negatives: 부정 샘플 수.
+        user_item_embeddings: 사용자-아이템 임베딩.
+    """
     def __init__(self, user_col, item_col, user_item_dict, all_items, item_probs, user_item_embeddings, num_negatives=1):
         self.user_col = user_col.cpu()
         self.item_col = item_col.cpu()
@@ -15,6 +27,9 @@ class PairwiseRecommendationDataset(Dataset):
 
 
 class LambdaRankLoss(nn.Module):
+    """
+    LambdaRank 손실 함수 클래스.
+    """
     def __init__(self):
         super(LambdaRankLoss, self).__init__()
 
@@ -30,6 +45,18 @@ class LambdaRankLoss(nn.Module):
         return loss
     
 def train_pairwise(model, train_loader, optimizer, device, genre_col, all_years, epochs=10):
+    """
+    모델을 쌍별 학습 방식으로 학습합니다.
+
+    Args:
+        model: 학습할 모델.
+        train_loader: 학습 데이터 로더.
+        optimizer: 옵티마이저.
+        device: 학습에 사용할 장치.
+        genre_col: 장르 임베딩 텐서.
+        all_years: 모든 연도 데이터.
+        epochs: 학습 에포크 수.
+    """
     model.train()
     criterion = LambdaRankLoss()
 
