@@ -6,8 +6,28 @@ from .model import AdmmSlim
 from .inference import generate_recommendations
 
 def main(args):
-    # 데이터 경로 설정
-    # 나중에 고치기 
+    """
+    ADMMSLIM 모델을 사용하여 추천 시스템을 실행하는 메인 함수.
+
+    Args:
+        args (Namespace): 설정값을 포함하는 인자. 다음과 같은 정보를 포함해야 합니다:
+            - dataset.data_path (str): 데이터셋 경로.
+            - model_args.lambda_1 (float): L1 정규화 가중치.
+            - model_args.lambda_2 (float): L2 정규화 가중치.
+            - model_args.rho (float): 페널티 매개변수.
+            - model_args.positive (bool): 계수를 양수로 제한할지 여부.
+            - model_args.n_iter (int): 최대 반복 횟수.
+            - model_args.verbose (bool): 학습 로그 출력 여부.
+
+    Workflow:
+        1. 데이터 로드 및 전처리.
+        2. ADMMSLIM 모델 학습.
+        3. 사용자별 추천 생성.
+        4. 추천 결과를 CSV 파일로 저장.
+
+    Output:
+        'recommendations.csv' 파일에 추천 결과를 저장합니다.
+    """
     base_dir = os.path.dirname(os.path.abspath(__file__))
     data_path = os.path.join(base_dir, args.dataset.data_path)
     data_path = args.dataset.data_path
