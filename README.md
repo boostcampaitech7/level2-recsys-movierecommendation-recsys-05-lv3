@@ -94,3 +94,5 @@ dataset :
 python main.py -c config/model_args -m Model -p param1 value1 param2 value2 ...
 ```
 
+자세한 파싱 정보는 main.py를 참고하세요.
+
