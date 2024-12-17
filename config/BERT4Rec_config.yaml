@@ -4,8 +4,8 @@ model: BERT4Rec
 
 model_args:
   BERT4Rec:
-    num_epochs: 3
-    batch_size: 128
+    num_epochs: 1
+    batch_size: 1024
     lr: 1e-3
     mask_prob: 0.15
     max_len: 50

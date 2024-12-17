@@ -10,6 +10,17 @@ from collections import defaultdict
 
 
 def train(config, model, data_loader):
+    """
+    주어진 모델과 데이터 로더를 사용하여 학습을 수행하는 함수입니다
+    
+    Args:
+        config (dict): 학습 설정 정보를 담은 딕셔너리
+        model (nn.Module): 학습할 PyTorch 모델
+        data_loader (DataLoader): 학습에 사용할 데이터로더
+
+    Returns:
+        nn.Module: 학습이 완료된 모델 객체
+    """
     parameters = config["parameters"]
 
     best_n100 = -np.inf
@@ -49,7 +60,17 @@ def train(config, model, data_loader):
 
 
 def random_neg(l, r, s):
-    # log에 존재하는 아이템과 겹치지 않도록 sampling
+    """
+    주어진 범위 [l, r) 내에서 집합 s에 없는 랜덤한 정수를 샘플링하는 함수입니다
+
+    Args:
+        l (int): 랜덤 정수 샘플링 시작 범위
+        r (int): 랜덤 정수 샘플링 종료 범위(미포함)
+        s (set): 샘플링 시 제외해야 하는 정수들의 집합
+
+    Returns:
+        int: s에 속하지 않는 [l, r) 범위 내의 랜덤한 정수
+    """
     t = np.random.randint(l, r)
     while t in s:
         t = np.random.randint(l, r)
@@ -57,6 +78,23 @@ def random_neg(l, r, s):
 
 
 def model_eval(config, model, user_train, user_valid, num_user, num_item):
+    """
+    주어진 모델을 평가하는 함수입니다
+    무작위로 선택한 사용자 샘플에 대해 NDCG@10 및 HIT@10을 측정합니다
+
+    Args:
+        config (dict): 모델 및 평가에 필요한 설정 정보
+        model (nn.Module): 평가할 모델
+        user_train (dict): 사용자별 학습용 아이템 시퀀스를 담은 딕셔너리
+                            키: 사용자 인덱스, 값: 아이템 인덱스 리스트
+        user_valid (dict): 사용자별 검증용 아이템(마지막 상호작용)을 담은 딕셔너리
+                            키: 사용자 인덱스, 값: 아이템 인덱스 리스트(검증용 1개 아이템 포함)
+        num_user (int): 전체 사용자 수
+        num_item (int): 전체 아이템 수
+
+    Returns:
+        None: 함수 내에서 NDCG@10, HIT@10 결과를 콘솔에 출력합니다
+    """
     parameters = config["parameters"]
 
     NDCG = 0.0  # NDCG@10

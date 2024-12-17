@@ -10,6 +10,16 @@ from collections import defaultdict
 
 
 def inference(config, model):
+    """
+    주어진 모델을 이용해 전체 사용자에 대한 추천 결과를 예측하고, 이를 CSV 파일로 저장하는 함수입니다
+    
+    Args:
+        config (dict): 모델, 데이터셋 경로, 파라미터 등의 설정 정보를 담은 딕셔너리
+        model (nn.Module): 추천 모델 객체
+    
+    Returns:
+        None: 함수 실행 후 결과를 CSV 파일로 저장하고, 콘솔에 "Inference Done!"을 출력합니다
+    """
     parameters = config["parameters"]
 
     df = pd.read_csv(os.path.join(config["dataset"]["data_path"], "train_ratings.csv"), header=0)

@@ -8,6 +8,20 @@ from torch.utils.data import Dataset, DataLoader
 
 
 def Data_Preprocess(config):
+    """"
+    주어진 학습 데이터("train_ratings.csv")를 읽고, 사용자와 아이템을 재인덱싱한 뒤
+    각 사용자의 기록을 학습용과 검증용으로 나누어 반환하는 함수입니다
+
+    Args:
+        config (dict): 데이터셋 경로를 포함한 설정 딕셔너리
+
+    Returns:
+        tuple: (user_train, user_valid, num_user, num_item)
+            user_train (dict): 사용자 인덱스를 키로, 해당 사용자의 학습용 아이템 인덱스 리스트를 값으로 갖는 딕셔너리
+            user_valid (dict): 사용자 인덱스를 키로, 해당 사용자의 검증용 아이템 인덱스(마지막 상호작용) 리스트를 값으로 갖는 딕셔너리
+            num_user (int): 전체 사용자 수
+            num_item (int): 전체 아이템 수
+    """
     df = pd.read_csv(os.path.join(config['dataset']['data_path'], "train_ratings.csv"), header=0)
     item_ids = df["item"].unique()
     user_ids = df["user"].unique()
@@ -56,6 +70,21 @@ def Data_Preprocess(config):
 
 
 class SeqDataset(Dataset):
+    """
+    사용자별 상호작용 시퀀스를 바탕으로 BERT 스타일의 마스킹을 적용하여
+    학습용 데이터셋을 구성하는 PyTorch Dataset 클래스입니다.
+
+    Args:
+        config (dict): 학습에 필요한 파라미터를 담은 설정 딕셔너리.
+        user_train (dict): 사용자 인덱스를 키로, 해당 사용자의 아이템 시퀀스를 값으로 갖는 딕셔너리.
+        num_user (int): 전체 사용자 수.
+        num_item (int): 전체 아이템 수.
+
+    Returns:
+        (SeqDataset): PyTorch의 Dataset을 상속한 객체로, __getitem__ 호출 시 (tokens, labels)를 반환합니다.
+                    - tokens (torch.LongTensor): 마스킹 및 패딩이 적용된 아이템 시퀀스
+                    - labels (torch.LongTensor): 마스킹된 위치에 해당하는 아이템 인덱스(학습 대상), 그 외는 0
+    """
     def __init__(self, config, user_train, num_user, num_item):
         self.parameters = config["parameters"]
         self.user_train = user_train
@@ -65,11 +94,24 @@ class SeqDataset(Dataset):
         self.mask_prob = self.parameters["mask_prob"]
 
     def __len__(self):
-        # 총 user의 수 = 학습에 사용할 sequence의 수
+        """
+        Returns:
+            int: 전체 사용자 수(=시퀀스 수)를 반환합니다.
+        """
         return self.num_user
 
     def __getitem__(self, user):
-        # iterator를 구동할 때 사용됩니다.
+        """
+        특정 사용자에 대한 시퀀스를 BERT 스타일 마스킹을 적용한 뒤 반환합니다.
+
+        Args:
+            user (int): 사용자 인덱스.
+
+        Returns:
+            tuple(torch.LongTensor, torch.LongTensor):
+                - tokens: 마스킹 및 패딩 처리가 완료된 아이템 인덱스 시퀀스.
+                - labels: 마스킹된 위치의 실제 아이템 인덱스 (학습 대상), 나머지는 0.
+        """
         seq = self.user_train[user]
         tokens = []
         labels = []
