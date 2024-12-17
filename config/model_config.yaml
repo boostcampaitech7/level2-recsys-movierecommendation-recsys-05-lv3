@@ -1,6 +1,6 @@
 seed : 0
 device: cpu
-model: LightGCN
+model: EASE
 
 
 
@@ -46,21 +46,8 @@ model_args:
       valid_ratio: 0.1
       shuffle: True
 
-  LightGCN:
-    n_layers: 1
-    embedding_dim: 1
-    batch_size: 4096
-    n_epochs: 1
-    patience: 1
-    learning_rate: 0.00001
-    test_size: 0.9
-    random_state: 42
-    preprocessed: True
-    data_split: True
-    top_k: 10
-
 
 dataset :
-  data_path : /Users/jihoonryu/MovieRec/level2-recsys-movierecommendation-recsys-05-lv3/data/train
+  data_path : ../train/
   output_path : saved/output
   preprocessing_path : saved/preprocessed/
