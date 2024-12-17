@@ -1,4 +1,4 @@
-output_dir: "saved/output"
+output_dir: "../../saved/output"
 model_weights:
   ADMMSLIM:
     use: true
