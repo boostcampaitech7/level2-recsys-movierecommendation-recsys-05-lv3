@@ -4,6 +4,18 @@ from torch.utils.data import Dataset
 
 
 class PairwiseRecommendationDataset(Dataset):
+    """
+    사용자-아이템 쌍을 위한 데이터셋 클래스.
+
+    Attributes:
+        user_col: 사용자 ID 텐서.
+        item_col: 아이템 ID 텐서.
+        user_item_dict: 사용자별 시청한 아이템 딕셔너리.
+        all_items: 전체 아이템 리스트.
+        item_probs: 아이템 샘플링 확률.
+        num_negatives: 부정 샘플 수.
+        user_item_embeddings: 사용자-아이템 임베딩.
+    """
     def __init__(self, user_col, item_col, user_item_dict, all_items, item_probs, user_item_embeddings, num_negatives=1):
         self.user_col = user_col.cpu()
         self.item_col = item_col.cpu()
@@ -26,6 +38,15 @@ class PairwiseRecommendationDataset(Dataset):
         return user, pos_item, torch.tensor(neg_items, dtype=torch.long)
 
     def sample_similarity_negatives(self, user):
+        """
+        사용자-아이템 임베딩 유사도 기반으로 부정 샘플을 생성합니다.
+
+        Args:
+            user: 사용자 ID.
+
+        Returns:
+            list: 부정 아이템 ID 리스트.
+        """
         user_id = user.item()
         seen_items = self.user_item_dict[user_id]
 

@@ -3,6 +3,15 @@ import torch.nn as nn
 import numpy as np
 
 class DeepFM(nn.Module):
+    """
+    DeepFM 모델 클래스.
+
+    Attributes:
+        input_dims: 입력 차원 리스트.
+        embedding_dim: 임베딩 차원.
+        mlp_dims: MLP 레이어 차원 리스트.
+        drop_rate: 드롭아웃 비율.
+    """
     def __init__(self, input_dims, embedding_dim, mlp_dims, drop_rate=0.1):
         super(DeepFM, self).__init__()
         
@@ -45,6 +54,16 @@ class DeepFM(nn.Module):
         self.mlp_layers = nn.Sequential(*mlp_layers)
 
     def fm(self, x_categorical, x_continuous):
+        """
+        FM 컴포넌트를 계산합니다.
+
+        Args:
+            x_categorical: 범주형 입력 텐서.
+            x_continuous: 연속형 입력 텐서.
+
+        Returns:
+            Tensor: FM 출력.
+        """
         # Embedding lookup for categorical variables
         embed_x = self.embedding(x_categorical)  # (batch_size, num_categorical_features, embedding_dim) = (2048, 2, 64)
 
@@ -70,6 +89,16 @@ class DeepFM(nn.Module):
         return fm_y
 
     def mlp(self, x_categorical, x_continuous):
+        """
+        MLP 컴포넌트를 계산합니다.
+
+        Args:
+            x_categorical: 범주형 입력 텐서.
+            x_continuous: 연속형 입력 텐서.
+
+        Returns:
+            Tensor: MLP 출력.
+        """
         # Embedding lookup for categorical variables
         embed_x = self.embedding(x_categorical)  # (batch_size, num_categorical_features, embedding_dim)
         # print(f"MLP - Embed_x Shape: {embed_x.shape}")  # 확인: (1024, num_categorical_features, embedding_dim)
@@ -90,6 +119,16 @@ class DeepFM(nn.Module):
         return mlp_y
 
     def forward(self, x_categorical, x_continuous):
+        """
+        모델의 순전파를 정의합니다.
+
+        Args:
+            x_categorical: 범주형 입력 텐서.
+            x_continuous: 연속형 입력 텐서.
+
+        Returns:
+            Tensor: 모델 출력.
+        """ 
         # x_categorical: (batch_size, num_categorical_features)
         # x_continuous: (batch_size, total_continuous_feature_dim)
 
