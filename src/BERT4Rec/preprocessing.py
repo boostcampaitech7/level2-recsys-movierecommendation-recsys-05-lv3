@@ -4,13 +4,11 @@ import pandas as pd
 from collections import defaultdict
 
 import torch
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 
 
 def Data_Preprocess(config):
-    parameters = config["parameters"]
-    df = pd.read_csv(os.path.join(config["data_path"], "train_ratings.csv"), header=0)
-
+    df = pd.read_csv(os.path.join(config['dataset']['data_path'], "train_ratings.csv"), header=0)
     item_ids = df["item"].unique()
     user_ids = df["user"].unique()
     num_item, num_user = len(item_ids), len(user_ids)

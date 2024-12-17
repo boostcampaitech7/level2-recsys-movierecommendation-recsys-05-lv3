@@ -10,15 +10,6 @@ import yaml
 from .model import *
 
 
-def load_config(args):
-    with open(f"config/{args.model}.yaml") as f:
-        config = yaml.load(f, Loader=yaml.FullLoader)
-        config = config[f"V{args.config_ver}"]
-        print(config)
-
-    return config
-
-
 class Setting:
     @staticmethod
     def seed_everything(seed):
