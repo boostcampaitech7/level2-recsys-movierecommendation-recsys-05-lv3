@@ -4,34 +4,29 @@ import pandas as pd
 from scipy import sparse
 from copy import deepcopy
 import bottleneck as bn
-import argparse
 
-from model import *
+from .preprocessing import *
+from .model import *
 
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--epochs', type=int, default=100)
-    parser.add_argument('--threshold', type=int, default=3500)
-    parser.add_argument('--lambdaBB', type=int, default=1000)
-    parser.add_argument('--lambdaCC', type=int, default=10000)
-    parser.add_argument('--rho', type=int, default=50000)
-    parser.add_argument('--k', type=int, default=10)
-
-    return parser.parse_args()
 
 
 def main(args):
     print("Prepare Data-----------------------------------")
+    args.dataset.preprocessing_path = args.dataset.preprocessing_path +f'/{args.model}'
+    
+    if args.EASER.create :
+        Preprocessing(args.dataset.data_path,args.dataset.preprocessing_path)
+
     unique_sid = list()
-    with open(os.path.join('./output/unique_sid.txt'), 'r') as f:
+    with open(os.path.join(f'{args.dataset.preprocessing_path}/unique_sid.txt'), 'r') as f:
         for line in f:
             unique_sid.append(line.strip())
     unique_uid = list()
-    with open(os.path.join('./output/unique_uid.txt'), 'r') as f:
+    with open(os.path.join(f'{args.dataset.preprocessing_path}/unique_uid.txt'), 'r') as f:
         for line in f:
             unique_uid.append(line.strip())
 
-    train = pd.read_csv('./output/train.csv')
+    train = pd.read_csv(f'{args.dataset.preprocessing_path}/train.csv')
     rows, cols = train['uid'], train['sid']
     X = sparse.csr_matrix((np.ones_like(rows), (rows, cols)), dtype='float64', shape=((train['uid'].max() + 1), len(unique_sid)))
 
@@ -39,7 +34,7 @@ def main(args):
     XtXdiag = deepcopy(np.diag(XtX))
 
     XtX[np.diag_indices(XtX.shape[0])] = XtXdiag  
-    ii_feature_pairs = create_list_feature_pairs(XtX, args.threshold)
+    ii_feature_pairs = create_list_feature_pairs(XtX, args.model_args.threshold)
     print("number of feature-pairs: {}".format(len(ii_feature_pairs[0])))
 
     Z, CCmask = create_matrix_Z(ii_feature_pairs, X)
@@ -50,11 +45,12 @@ def main(args):
 
 
     print("Lets Train-----------------------------------")
-    BB, CC = train_higher(XtX, XtXdiag, args.lambdaBB, ZtZ, ZtZdiag, args.lambdaCC, CCmask, ZtX, args.rho, args.epochs)
+    BB, CC = train_higher(XtX, XtXdiag, args.model_args.lambdaBB, ZtZ, ZtZdiag, 
+                          args.model_args.lambdaCC, CCmask, ZtX, args.model_args.rho, args.model_args.epochs)
     
     print("Saving model...")
-    np.save('./output/BB.npy', BB)
-    np.save('./output/CC.npy', CC)
+    np.save(f'{args.dataset.preprocessing_path}/BB.npy', BB)
+    np.save(f'{args.dataset.preprocessing_path}/CC.npy', CC)
     print("Model saved successfully!")
 
 
@@ -62,8 +58,8 @@ def main(args):
     pred_val = (X).dot(BB) + Z.dot(CC)
     pred_val[X.nonzero()] = -np.inf  
     
-    idx_topk_part = bn.argpartition(-pred_val,  args.k, axis=1)
-    topk_part = pred_val[np.arange(pred_val.shape[0])[:, np.newaxis], idx_topk_part[:, :args.k]]
+    idx_topk_part = bn.argpartition(-pred_val,  args.model_args.k, axis=1)
+    topk_part = pred_val[np.arange(pred_val.shape[0])[:, np.newaxis], idx_topk_part[:, :args.model_args.k]]
     idx_part = np.argsort(-topk_part, axis=1)
     top_k_recommendations = idx_topk_part[np.arange(pred_val.shape[0])[:, np.newaxis], idx_part]
 
@@ -82,9 +78,5 @@ def main(args):
 
     print(recommendation_df)
 
-    recommendation_df.to_csv("../../saved/easer.csv")
+    recommendation_df.to_csv(f'{args.dataset.output_path}/EASER.csv')
 
-
-if __name__ == '__main__':
-    args = parse_args()
-    main(args)

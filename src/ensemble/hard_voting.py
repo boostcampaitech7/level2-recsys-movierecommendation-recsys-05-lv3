@@ -1,98 +1,96 @@
+import yaml
 import pandas as pd
 import os
 from collections import Counter
-from datetime import datetime
-import json
 
-output_dir = './predictions'
-output_final_dir = './finals'
+def load_config(yaml_file):
+    """
+    YAML 설정 파일을 로드합니다.
 
-if not os.path.exists(output_final_dir):
-    os.makedirs(output_final_dir)
+    Args:
+        yaml_file (str): YAML 설정 파일의 경로
 
-file_paths = sorted([os.path.join(output_dir, file) for file in os.listdir(output_dir) if file.endswith('.csv')])
-dataframes = [pd.read_csv(file) for file in file_paths]
+    Returns:
+        dict: YAML 파일의 내용을 담은 딕셔너리
+    """
+    with open(yaml_file, 'r') as file:
+        return yaml.safe_load(file)
 
-# 사용자에게 동일 가중치 사용 여부 확인
-while True:
-    user_input = input("모든 파일에 동일한 가중치를 적용하시겠습니까? (y/n): ").lower()
-    if user_input in ['y', 'n']:
-        use_equal_weights = (user_input == 'y')
-        break
-    else:
-        print("잘못된 입력입니다. 'y' 또는 'n'을 입력해주세요.")
+def weighted_vote(predictions, weights):
+    """
+    가중치를 적용한 투표를 수행하여 상위 10개 아이템을 선택합니다.
 
-# 가중치 입력 부분
-weights = {}
-if use_equal_weights:
-    equal_weight = 1.0 / len(file_paths)
-    weights = {os.path.basename(file): equal_weight for file in file_paths}
-else:
-    for file_path in file_paths:
-        file_name = os.path.basename(file_path)
-        print(f"파일: {file_name}")
-        weight = float(input(f"{file_name}의 가중치를 입력하세요: "))
-        weights[file_name] = weight
+    Args:
+        predictions (dict): 모델별 예측 결과
+        weights (dict): 모델별 가중치 정보
 
-# 데이터프레임 로드 및 가중치 적용
-dataframes = [(pd.read_csv(file), weights[os.path.basename(file)]) for file in file_paths]
+    Returns:
+        list: 가중치 투표 결과 상위 10개 아이템 목록
+    """
+    weighted_votes = Counter()
+    for model, preds in predictions.items():
+        if weights[model]['use']:
+            for item in preds:
+                weighted_votes[item] += weights[model]['weight']
+    return [item for item, _ in weighted_votes.most_common(10)]
 
-if use_equal_weights:
-    # 동일 가중치 적용 시 기존 코드 사용
-    user_recommendations = {}
-    for df, _ in dataframes:
-        for _, row in df.iterrows():
-            user = row.iloc[0]
-            item = row.iloc[1]
-            if user not in user_recommendations:
-                user_recommendations[user] = []
-            user_recommendations[user].append(item)
+def main():
+    """
+    메인 함수: 설정을 로드하고, 예측 결과를 처리하여 최종 추천을 생성합니다.
+    
+    - YAML 설정 파일을 로드합니다.
+    - 각 모델의 예측 결과를 읽어 처리합니다.
+    - 가중치 투표를 통해 최종 추천을 생성합니다.
+    - 최종 추천 결과를 CSV 파일로 저장합니다.
+    - 사용된 모델과 가중치 정보를 로그 파일로 저장합니다.
+
+    오류 발생 시 프로그램을 종료합니다.
+    """
+    config = load_config('../../config/model_weights.yaml')
+    output_dir = config['output_dir']
+    model_weights = config['model_weights']
+    experiment_id = config['id']
+    
+    predictions = {}
+    used_models = {}
+    for model, info in model_weights.items():
+        if info['use']:
+            file_path = os.path.join(output_dir, info['file'])
+            try:
+                df = pd.read_csv(file_path)
+                predictions[model] = df.groupby('user')['item'].apply(list).to_dict()
+                used_models[model] = info['weight']
+            except FileNotFoundError:
+                print(f"Error: File not found for model {model}: {file_path}")
+                return
+
+    if not predictions:
+        print("Error: No valid prediction files found. Exiting.")
+        return
 
     final_recommendations = {}
-    for user, items in user_recommendations.items():
-        item_counts = Counter(items)
-        most_common_items = [item for item, _ in item_counts.most_common(10)]
-        final_recommendations[user] = most_common_items
+    for user in predictions[list(predictions.keys())[0]]:
+        user_preds = {model: preds[user] for model, preds in predictions.items() if user in preds}
+        final_recommendations[user] = weighted_vote(user_preds, model_weights)
 
-else:
-    # 다른 가중치 적용 시 수정된 코드 사용
-    user_recommendations = {}
-    for df, weight in dataframes:
-        for _, row in df.iterrows():
-            user = row.iloc[0]
-            item = row.iloc[1]
-            if user not in user_recommendations:
-                user_recommendations[user] = Counter()
-            user_recommendations[user][item] += weight
+    final_df = pd.DataFrame(
+        [(user, item) for user, items in final_recommendations.items() for item in items],
+        columns=["user", "item"]
+    )
+    
+    final_output_path = os.path.join(output_dir, f'final_recommendations_{experiment_id}.csv')
+    final_df.to_csv(final_output_path, index=False)
+    print(f"Final recommendations saved to {final_output_path}")
 
-    final_recommendations = {}
-    for user, items in user_recommendations.items():
-        final_recommendations[user] = [item for item, _ in items.most_common(10)]
+    # 로그 파일 생성
+    log_output_path = os.path.join(output_dir, f'final_recommendations_{experiment_id}.log')
+    with open(log_output_path, 'w') as log_file:
+        log_file.write(f"Experiment ID: {experiment_id}\n\n")
+        log_file.write("Used models and their weights:\n")
+        for model, weight in used_models.items():
+            log_file.write(f"{model}: {weight}\n")
 
-final_df = pd.DataFrame(
-    [(user, item) for user, items in final_recommendations.items() for item in items],
-    columns=["user", "item"]
-)
+    print(f"Log file created: {log_output_path}")
 
-timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-
-# 가중치의 총합 계산
-total_weight = sum(weights.values())
-
-# 가중치 정보를 JSON으로 저장 (원래 가중치와 비율 모두 저장)
-weight_info = {
-    "original_weights": weights,
-    "weight_ratios": {file: (weight / total_weight) * 100 for file, weight in weights.items()}
-}
-weight_info_file = os.path.join(output_final_dir, f'{timestamp}_weights.json')
-
-with open(weight_info_file, 'w', encoding='utf-8') as f:
-    json.dump(weight_info, f, ensure_ascii=False, indent=4)
-
-print(f"가중치 정보가 {weight_info_file}에 저장되었습니다.")
-
-output_file = os.path.join(output_final_dir, f'{timestamp}.csv')
-
-final_df.to_csv(output_file, index=False)
-
-print(f"추천 결과가 {output_file}에 저장되었습니다.")
+if __name__ == "__main__":
+    main()

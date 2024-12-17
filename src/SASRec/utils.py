@@ -87,16 +87,64 @@ class EarlyStopping:
 
 
 def kmax_pooling(x, dim, k):
+    """
+    주어진 텐서에서 상위 k개의 값을 선택하는 함수입니다.
+
+    매개변수
+    ----------
+    x : torch.Tensor
+        상위 k개 값을 선택할 입력 텐서
+    dim : int
+        값을 선택할 차원
+    k : int
+        선택할 상위 k개의 개수
+
+    반환값
+    -------
+    torch.Tensor
+        선택된 상위 k개의 값이 포함된 텐서
+    """
     index = x.topk(k, dim=dim)[1].sort(dim=dim)[0]
     return x.gather(dim, index).squeeze(dim)
 
 
 def avg_pooling(x, dim):
+    """
+    주어진 텐서에서 지정된 차원의 평균을 계산하는 함수입니다.
+
+    매개변수
+    ----------
+    x : torch.Tensor
+        평균을 계산할 입력 텐서
+    dim : int
+        평균을 계산할 차원
+
+    반환값
+    -------
+    torch.Tensor
+        지정된 차원의 평균값
+    """
     return x.sum(dim=dim) / x.size(dim)
 
 
 def generate_rating_matrix_valid(user_seq, num_users, num_items):
-    # three lists are used to construct sparse matrix
+    """
+    검증용 평가 행렬을 생성하는 함수입니다.
+
+    매개변수
+    ----------
+    user_seq : list of list
+        각 사용자의 아이템 시퀀스
+    num_users : int
+        사용자 수
+    num_items : int
+        아이템 수
+
+    반환값
+    -------
+    csr_matrix
+        검증용 평가 행렬 (희소 행렬)
+    """
     row = []
     col = []
     data = []
@@ -115,7 +163,23 @@ def generate_rating_matrix_valid(user_seq, num_users, num_items):
 
 
 def generate_rating_matrix_test(user_seq, num_users, num_items):
-    # three lists are used to construct sparse matrix
+    """
+    테스트용 평가 행렬을 생성하는 함수입니다.
+
+    매개변수
+    ----------
+    user_seq : list of list
+        각 사용자의 아이템 시퀀스
+    num_users : int
+        사용자 수
+    num_items : int
+        아이템 수
+
+    반환값
+    -------
+    csr_matrix
+        테스트용 평가 행렬 (희소 행렬)
+    """
     row = []
     col = []
     data = []
@@ -134,7 +198,23 @@ def generate_rating_matrix_test(user_seq, num_users, num_items):
 
 
 def generate_rating_matrix_submission(user_seq, num_users, num_items):
-    # three lists are used to construct sparse matrix
+    """
+    제출용 평가 행렬을 생성하는 함수입니다.
+
+    매개변수
+    ----------
+    user_seq : list of list
+        각 사용자의 아이템 시퀀스
+    num_users : int
+        사용자 수
+    num_items : int
+        아이템 수
+
+    반환값
+    -------
+    csr_matrix
+        제출용 평가 행렬 (희소 행렬)
+    """
     row = []
     col = []
     data = []
@@ -152,9 +232,22 @@ def generate_rating_matrix_submission(user_seq, num_users, num_items):
     return rating_matrix
 
 
-def generate_submission_file(data_file, preds):
+def generate_submission_file(args, preds):
+    """
+    예측 결과를 파일로 저장하는 함수입니다.
 
-    rating_df = pd.read_csv(data_file)
+    매개변수
+    ----------
+    args : Namespace
+        인자들을 담고 있는 객체 (예: 출력 디렉토리 경로)
+    preds : list of list
+        예측된 아이템들
+
+    반환값
+    -------
+    없음
+    """
+    rating_df = pd.read_csv(args.data_file)
     users = rating_df["user"].unique()
 
     result = []
@@ -164,11 +257,24 @@ def generate_submission_file(data_file, preds):
             result.append((users[index], item))
 
     pd.DataFrame(result, columns=["user", "item"]).to_csv(
-        "output/submission.csv", index=False
+        f"{args.output_dir}/{args.model}.csv", index=False
     )
 
 
 def get_user_seqs(data_file):
+    """
+    데이터 파일에서 사용자별 아이템 시퀀스를 추출하고, 유효, 테스트 및 제출용 평가 행렬을 생성하는 함수입니다.
+
+    매개변수
+    ----------
+    data_file : str
+        사용자-아이템 평가 데이터를 담고 있는 파일 경로
+
+    반환값
+    -------
+    tuple
+        사용자 시퀀스, 최대 아이템 ID, 유효/테스트/제출용 평가 행렬
+    """ 
     rating_df = pd.read_csv(data_file)
     lines = rating_df.groupby("user")["item"].apply(list)
     user_seq = []
@@ -198,6 +304,19 @@ def get_user_seqs(data_file):
 
 
 def get_user_seqs_long(data_file):
+    """
+    데이터 파일에서 사용자별 아이템 시퀀스를 추출하고, 긴 시퀀스와 사용자 시퀀스를 반환하는 함수입니다.
+
+    매개변수
+    ----------
+    data_file : str
+        사용자-아이템 평가 데이터를 담고 있는 파일 경로
+
+    반환값
+    -------
+    tuple
+        사용자 시퀀스, 최대 아이템 ID, 전체 아이템 시퀀스
+    """
     rating_df = pd.read_csv(data_file)
     lines = rating_df.groupby("user")["item"].apply(list)
     user_seq = []
@@ -214,6 +333,19 @@ def get_user_seqs_long(data_file):
 
 
 def get_item2attribute_json(data_file):
+    """
+    아이템과 그 속성 간의 매핑을 담은 JSON 파일을 읽어들이고, 속성의 크기를 계산하는 함수입니다.
+
+    매개변수
+    ----------
+    data_file : str
+        아이템 속성을 담고 있는 JSON 파일 경로
+
+    반환값
+    -------
+    tuple
+        아이템-속성 매핑, 속성 크기
+    """
     item2attribute = json.loads(open(data_file).readline())
     attribute_set = set()
     for item, attributes in item2attribute.items():
@@ -223,6 +355,21 @@ def get_item2attribute_json(data_file):
 
 
 def get_metric(pred_list, topk=10):
+    """
+    예측 결과에 대해 HIT, NDCG, MRR 등의 평가 지표를 계산하는 함수입니다.
+
+    매개변수
+    ----------
+    pred_list : list
+        예측된 순위 리스트
+    topk : int, 선택적
+        평가할 상위 k값 (기본값은 10)
+
+    반환값
+    -------
+    tuple
+        HIT, NDCG, MRR 값
+    """
     NDCG = 0.0
     HIT = 0.0
     MRR = 0.0
@@ -236,6 +383,23 @@ def get_metric(pred_list, topk=10):
 
 
 def precision_at_k_per_sample(actual, predicted, topk):
+    """
+    개별 샘플에 대해 k에서의 정밀도를 계산하는 함수입니다.
+
+    매개변수
+    ----------
+    actual : list
+        실제 아이템 리스트
+    predicted : list
+        예측된 아이템 리스트
+    topk : int
+        평가할 상위 k값
+
+    반환값
+    -------
+    float
+        해당 샘플에 대한 정밀도 값
+    """
     num_hits = 0
     for place in predicted:
         if place in actual:
@@ -244,6 +408,23 @@ def precision_at_k_per_sample(actual, predicted, topk):
 
 
 def precision_at_k(actual, predicted, topk):
+    """
+    전체 사용자에 대해 k에서의 정밀도를 계산하는 함수입니다.
+
+    매개변수
+    ----------
+    actual : list of list
+        각 사용자에 대한 실제 아이템 리스트
+    predicted : list of list
+        각 사용자에 대한 예측된 아이템 리스트
+    topk : int
+        평가할 상위 k값
+
+    반환값
+    -------
+    float
+        전체 사용자에 대한 정밀도 값
+    """
     sum_precision = 0.0
     num_users = len(predicted)
     for i in range(num_users):
@@ -255,6 +436,23 @@ def precision_at_k(actual, predicted, topk):
 
 
 def recall_at_k(actual, predicted, topk):
+    """
+    k에서의 재현율을 계산하는 함수입니다.
+
+    매개변수
+    ----------
+    actual : list of list
+        각 사용자에 대한 실제 아이템 리스트
+    predicted : list of list
+        각 사용자에 대한 예측된 아이템 리스트
+    topk : int
+        평가할 상위 k값
+
+    반환값
+    -------
+    float
+        전체 사용자에 대한 재현율 값
+    """
     sum_recall = 0.0
     num_users = len(predicted)
     true_users = 0
@@ -269,21 +467,22 @@ def recall_at_k(actual, predicted, topk):
 
 def apk(actual, predicted, k=10):
     """
-    Computes the average precision at k.
-    This function computes the average precision at k between two lists of
-    items.
-    Parameters
+    k에서의 평균 정밀도를 계산합니다.
+    이 함수는 두 개의 아이템 리스트에 대해 k에서의 평균 정밀도를 계산합니다.
+    
+    매개변수
     ----------
     actual : list
-             A list of elements that are to be predicted (order doesn't matter)
+        예측해야 할 아이템들의 리스트입니다. (리스트 내 순서는 중요하지 않음)
     predicted : list
-                A list of predicted elements (order does matter)
-    k : int, optional
-        The maximum number of predicted elements
-    Returns
+        예측된 아이템들의 리스트입니다. (리스트 내 순서는 중요)
+    k : int, 선택적
+        예측된 아이템들의 최대 개수
+
+    반환값
     -------
-    score : double
-            The average precision at k over the input lists
+    score : float
+        입력된 리스트에 대한 k에서의 평균 정밀도 값
     """
     if len(predicted) > k:
         predicted = predicted[:k]
@@ -304,28 +503,40 @@ def apk(actual, predicted, k=10):
 
 def mapk(actual, predicted, k=10):
     """
-    Computes the mean average precision at k.
-    This function computes the mean average prescision at k between two lists
-    of lists of items.
-    Parameters
+    k에서 평균 정밀도(Mean Average Precision, MAP)를 계산합니다.
+    이 함수는 두 개의 아이템 리스트의 리스트에 대해 k에서의 평균 정밀도를 계산합니다.
+    
+    매개변수
     ----------
     actual : list
-             A list of lists of elements that are to be predicted
-             (order doesn't matter in the lists)
+        예측해야 할 아이템들의 리스트의 리스트 (리스트 내 순서는 중요하지 않음)
     predicted : list
-                A list of lists of predicted elements
-                (order matters in the lists)
-    k : int, optional
-        The maximum number of predicted elements
-    Returns
+        예측된 아이템들의 리스트의 리스트 (리스트 내 순서는 중요)
+    k : int, 선택적
+        예측된 아이템들의 최대 개수
+
+    반환값
     -------
-    score : double
-            The mean average precision at k over the input lists
+    score : float
+        입력된 리스트에 대한 k에서의 평균 정밀도 값
     """
     return np.mean([apk(a, p, k) for a, p in zip(actual, predicted)])
 
 
 def ndcg_k(actual, predicted, topk):
+    """
+    주어진 실제 값(actual)과 예측 값(predicted)에 대해 NDCG@k (Normalized Discounted Cumulative Gain) 점수를 계산하는 함수입니다.
+    NDCG는 추천 시스템에서 추천된 항목들의 순서를 평가하는 지표로, 높은 순위에 더 높은 가중치를 부여하여 평가합니다.
+
+    Args:
+        actual (list of list): 각 사용자에 대한 실제 아이템 리스트. 각 사용자마다 실제 아이템의 순서대로 목록이 포함됩니다.
+        predicted (list of list): 각 사용자에 대한 예측된 아이템 리스트. 각 사용자마다 예측된 아이템의 순서대로 목록이 포함됩니다.
+        topk (int): 계산할 상위 k개 항목에 대해 NDCG를 평가합니다.
+
+    Returns:
+        float: 전체 사용자의 평균 NDCG@k 점수.
+
+    """
     res = 0
     for user_id in range(len(actual)):
         k = min(topk, len(actual[user_id]))
@@ -340,8 +551,19 @@ def ndcg_k(actual, predicted, topk):
     return res / float(len(actual))
 
 
-# Calculates the ideal discounted cumulative gain at k
+
 def idcg_k(k):
+    """
+    주어진 k에 대해 이상적인 할인 누적 이득(DCG, Discounted Cumulative Gain)을 계산하는 함수입니다.
+    이상적인 DCG는 실제 결과의 순위가 가장 좋은 경우에 대한 DCG를 나타냅니다.
+
+    Args:
+        k (int): 계산할 상위 k개 항목에 대해 DCG를 평가합니다.
+
+    Returns:
+        float: 주어진 k에 대한 이상적인 DCG 값.
+    """
+    res = su
     res = sum([1.0 / math.log(i + 2, 2) for i in range(k)])
     if not res:
         return 1.0

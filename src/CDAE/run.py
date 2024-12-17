@@ -1,12 +1,14 @@
+import os
 import pandas as pd
 import torch
-import argparse
-from preprocessing import load_data, encode_data, generate_negative_samples, prepare_final_data
-from model import CDAEModel, train_model
-from inference import recommend_top_k
+from .preprocessing import load_data, encode_data, generate_negative_samples, prepare_final_data
+from .model import CDAEModel, train_model
+from .inference import recommend_top_k
 
-def main(data_path):
-    train_df = load_data(data_path)
+def main(args):
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    data_path = os.path.join(base_dir, args.dataset.data_path, 'train_ratings.csv')
+    train_df = pd.read_csv(data_path)
     train_df_encoded, user_encoder, item_encoder = encode_data(train_df)
 
     num_users = train_df_encoded['user_id'].nunique()
@@ -23,15 +25,15 @@ def main(data_path):
     trained_model_instance, _, _ = train_model(model_instance,
                                                final_data_encoded,
                                                num_items,
-                                               num_epochs=10,
-                                               batch_size=128,
-                                               learning_rate=0.001,
+                                               num_epochs=args.model_args.epochs,
+                                               batch_size=args.model_args.batch_size,
+                                               learning_rate=args.model_args.lr,
                                                device=device)
 
     recommendation_result = recommend_top_k(trained_model_instance,
                                             final_data_encoded,
                                             num_users=num_users,
-                                            k=10)
+                                            k=args.model_args.k)
 
     header = True 
     chunk_size = 1000 
@@ -51,11 +53,3 @@ def main(data_path):
             rows = [] 
 
     print("추천 결과가 저장되었습니다.")
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--data_path', type=str, default="./data/train/train_ratings.csv")
-    
-    args = parser.parse_args()
-    
-    main(args.data_path)

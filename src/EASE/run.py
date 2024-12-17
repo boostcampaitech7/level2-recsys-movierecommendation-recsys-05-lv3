@@ -1,23 +1,21 @@
 import os
+import argparse
+import json
 
 import numpy as np
 import pandas as pd
 from scipy.sparse import csr_matrix
 from sklearn.preprocessing import LabelEncoder
 import torch
-import argparse
 
-from model import *
-
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--_lambda',type=int, default=1000)
-    return parser.parse_args()
+from .model import *
 
 
 def main(args):
     print("Load Data-----------------------------------")
-    train = pd.read_csv('../../../data/train/train_ratings.csv')
+    print(args)
+
+    train = pd.read_csv(f'{args.dataset.data_path}/train_ratings.csv')
     user_list = train['user'].unique()
     item_list = train['item'].unique()
 
@@ -38,7 +36,8 @@ def main(args):
     rating_matrix = csr_matrix((data, (rows, cols)), shape=(num_users, num_items))
 
 
-    model = EASE(args._lambda)
+    model = EASE(args.model_args._lambda)
+
     print("Lets Data-----------------------------------")
     model.train(rating_matrix)
 
@@ -54,7 +53,6 @@ def main(args):
         top_n_indices_sorted = top_n_indices[np.argsort(user_predictions[top_n_indices])[::-1]]
         top_n_items_per_user.append(top_n_indices_sorted)
 
-
     index_to_item = {index: item for item, index in item_to_index.items()}
     top_n_items_per_user_ids = [[index_to_item[idx] for idx in user_items] for user_items in top_n_items_per_user]
 
@@ -63,13 +61,12 @@ def main(args):
         for item_id in items:
             result.append((user_id, item_id))
 
-    pro_dir = os.path.join('./output/')
+    pro_dir = os.path.join(f'{args.dataset.save_path}')
     if not os.path.exists(pro_dir):
         os.makedirs(pro_dir)
+
     submission_df = pd.DataFrame(result, columns=['user', 'item'])
-    submission_df.to_csv(f'../../saved/EASE_{args._lambda}.csv', index=False)
+    submission_df.to_csv(f'{args.dataset.save_path}/EASE.csv', index=False)
 
 
-if __name__ == '__main__':
-    args = parse_args()
-    main(args)
+

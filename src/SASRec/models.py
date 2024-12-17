@@ -1,11 +1,38 @@
 import torch
 import torch.nn as nn
 
-from modules import Encoder, LayerNorm
+from .modules import Encoder, LayerNorm
 
 
 class S3RecModel(nn.Module):
+    """
+    연속 추천 시스템을 위한 심층 학습 모델로, 여러 손실 함수를 사용하여 다양한 작업을 수행합니다. 
+    이 모델은 AAP(연관된 속성 예측), MIP(마스킹된 아이템 예측), MAP(마스킹된 속성 예측), SP(세그먼트 예측) 등의 작업을 다룹니다.
+
+    Args:
+        args: 하이퍼파라미터를 포함하는 네임스페이스 또는 객체. 예: item_size, attribute_size, hidden_size, max_seq_length, hidden_dropout_prob, mask_id, initializer_range.
+
+    Attributes:
+        item_embeddings: 아이템을 표현하는 임베딩 레이어.
+        attribute_embeddings: 속성을 표현하는 임베딩 레이어.
+        position_embeddings: 위치 인코딩을 위한 임베딩 레이어.
+        item_encoder: 아이템 시퀀스를 처리하는 인코더 모듈.
+        LayerNorm: 시퀀스 임베딩에 대한 레이어 정규화.
+        dropout: 과적합을 방지하기 위한 드롭아웃 레이어.
+        aap_norm: 연관된 속성 예측(AAP) 결과를 정규화하는 선형 레이어.
+        mip_norm: 마스킹된 아이템 예측(MIP) 결과를 정규화하는 선형 레이어.
+        map_norm: 마스킹된 속성 예측(MAP) 결과를 정규화하는 선형 레이어.
+        sp_norm: 세그먼트 예측(SP) 결과를 정규화하는 선형 레이어.
+        criterion: 훈련에 사용되는 손실 함수, BCELoss.
+        args: 입력된 하이퍼파라미터를 담고 있는 객체.
+    """
     def __init__(self, args):
+        """
+        S3RecModel 초기화.
+        
+        Args:
+            args: 하이퍼파라미터를 포함하는 네임스페이스 객체.
+        """
         super(S3RecModel, self).__init__()
         self.item_embeddings = nn.Embedding(
             args.item_size, args.hidden_size, padding_idx=0
@@ -30,9 +57,14 @@ class S3RecModel(nn.Module):
     # AAP
     def associated_attribute_prediction(self, sequence_output, attribute_embedding):
         """
-        :param sequence_output: [B L H]
-        :param attribute_embedding: [arribute_num H]
-        :return: scores [B*L tag_num]
+        연관된 속성 예측(AAP)을 수행합니다.
+
+        Args:
+            sequence_output: 아이템 시퀀스 인코더의 출력, 형태는 [B, L, H].
+            attribute_embedding: 속성 임베딩, 형태는 [attribute_num, H].
+
+        Returns:
+            score: 연관된 속성에 대한 예측 점수, 형태는 [B*L, attribute_num].
         """
         sequence_output = self.aap_norm(sequence_output)  # [B L H]
         sequence_output = sequence_output.view(
@@ -45,9 +77,14 @@ class S3RecModel(nn.Module):
     # MIP sample neg items
     def masked_item_prediction(self, sequence_output, target_item):
         """
-        :param sequence_output: [B L H]
-        :param target_item: [B L H]
-        :return: scores [B*L]
+        마스킹된 아이템 예측(MIP)을 수행합니다.
+
+        Args:
+            sequence_output: 아이템 시퀀스 인코더의 출력, 형태는 [B, L, H].
+            target_item: 예측하려는 대상 아이템, 형태는 [B, L, H].
+
+        Returns:
+            score: 대상 아이템에 대한 예측 점수, 형태는 [B*L].
         """
         sequence_output = self.mip_norm(
             sequence_output.view([-1, self.args.hidden_size])
@@ -58,6 +95,16 @@ class S3RecModel(nn.Module):
 
     # MAP
     def masked_attribute_prediction(self, sequence_output, attribute_embedding):
+        """
+        마스킹된 속성 예측(MAP)을 수행합니다.
+
+        Args:
+            sequence_output: 아이템 시퀀스 인코더의 출력, 형태는 [B, L, H].
+            attribute_embedding: 속성 임베딩, 형태는 [attribute_num, H].
+
+        Returns:
+            score: 마스킹된 속성에 대한 예측 점수, 형태는 [B*L, attribute_num].
+        """
         sequence_output = self.map_norm(sequence_output)  # [B L H]
         sequence_output = sequence_output.view(
             [-1, self.args.hidden_size, 1]
@@ -69,9 +116,14 @@ class S3RecModel(nn.Module):
     # SP sample neg segment
     def segment_prediction(self, context, segment):
         """
-        :param context: [B H]
-        :param segment: [B H]
-        :return:
+        세그먼트 예측(SP)을 수행합니다.
+
+        Args:
+            context: 현재 세그먼트의 컨텍스트, 형태는 [B, H].
+            segment: 예측하려는 세그먼트, 형태는 [B, H].
+
+        Returns:
+            score: 대상 세그먼트에 대한 예측 점수, 형태는 [B].
         """
         context = self.sp_norm(context)
         score = torch.mul(context, segment)  # [B H]
@@ -79,7 +131,15 @@ class S3RecModel(nn.Module):
 
     #
     def add_position_embedding(self, sequence):
+        """
+        아이템 시퀀스에 위치 임베딩을 추가합니다.
 
+        Args:
+            sequence: 아이템 ID로 이루어진 입력 시퀀스, 형태는 [B, L].
+
+        Returns:
+            sequence_emb: 위치 인코딩이 추가된 아이템 임베딩, 형태는 [B, L, H].
+        """
         seq_length = sequence.size(1)
         position_ids = torch.arange(
             seq_length, dtype=torch.long, device=sequence.device
@@ -103,8 +163,24 @@ class S3RecModel(nn.Module):
         pos_segment,
         neg_segment,
     ):
+        """
+        주어진 입력에 대해 모델을 사전 훈련합니다.
 
-        # Encode masked sequence
+        Args:
+            attributes: 속성 레이블을 나타내는 텐서, 형태는 [B, attribute_size].
+            masked_item_sequence: 마스킹된 아이템 시퀀스를 나타내는 텐서, 형태는 [B, L].
+            pos_items: 긍정적인 아이템을 나타내는 텐서, 형태는 [B, L].
+            neg_items: 부정적인 아이템을 나타내는 텐서, 형태는 [B, L].
+            masked_segment_sequence: 마스킹된 세그먼트 시퀀스를 나타내는 텐서, 형태는 [B, L].
+            pos_segment: 긍정적인 세그먼트를 나타내는 텐서, 형태는 [B, L].
+            neg_segment: 부정적인 세그먼트를 나타내는 텐서, 형태는 [B, L].
+
+        Returns:
+            aap_loss: 연관된 속성 예측(AAP)에 대한 손실 값.
+            mip_loss: 마스킹된 아이템 예측(MIP)에 대한 손실 값.
+            map_loss: 마스킹된 속성 예측(MAP)에 대한 손실 값.
+            sp_loss: 세그먼트 예측(SP)에 대한 손실 값.
+        """
 
         sequence_emb = self.add_position_embedding(masked_item_sequence)
         sequence_mask = (masked_item_sequence == 0).float() * -1e8
@@ -197,7 +273,15 @@ class S3RecModel(nn.Module):
     # Fine tune
     # same as SASRec
     def finetune(self, input_ids):
+        """
+        주어진 입력 시퀀스에 대해 모델을 미세 조정합니다.
 
+        Args:
+            input_ids: 아이템 ID로 이루어진 입력 시퀀스, 형태는 [B, L].
+
+        Returns:
+            sequence_output: 인코딩된 최종 시퀀스 출력, 형태는 [B, L, H].
+        """
         attention_mask = (input_ids > 0).long()
         extended_attention_mask = attention_mask.unsqueeze(1).unsqueeze(
             2
@@ -227,7 +311,12 @@ class S3RecModel(nn.Module):
         return sequence_output
 
     def init_weights(self, module):
-        """Initialize the weights."""
+        """
+        모델 파라미터의 가중치를 초기화합니다.
+
+        Args:
+            module: 가중치를 초기화할 PyTorch 모듈 (예: nn.Linear, nn.Embedding 등).
+        """
         if isinstance(module, (nn.Linear, nn.Embedding)):
             # Slightly different from the TF version which uses truncated_normal for initialization
             # cf https://github.com/pytorch/pytorch/pull/5617
