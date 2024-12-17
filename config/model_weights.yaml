@@ -1,3 +1,4 @@
+id: "experiment_001"
 output_dir: "../../saved/output"
 model_weights:
   ADMMSLIM:
