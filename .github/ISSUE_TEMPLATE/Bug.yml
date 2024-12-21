@@ -1,0 +1,20 @@
+name: "🐛 Bug"
+description: "버그 리포트"
+labels: ["bug"]
+body:
+  - type: textarea
+    attributes:
+      label: 배경 및 필요성
+      placeholder: 문제점을 제시해주세요.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 수정할 내용
+      placeholder: 고쳐야 할 부분을 적어주세요.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: See Also
+      placeholder: 참고할 부분이 있다면 이곳에 적어주세요.
