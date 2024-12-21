@@ -63,9 +63,13 @@ project
 <br>
 
 # 🏃 How to run
-## Config
+## Config File
 
-model_config.yaml
+기본 config 파일은 아래와 같으며, 새로운 config 파일을 정의하셔도 됩니다.
+
+또한, 모델 실행 시 Default 파라미터가 정의되어 있습니다.
+
+__model_config.yaml__
 
 ```bash
 seed : 0
@@ -86,7 +90,6 @@ dataset :
 ```
 
 ## 전처리 & 학습 & 예측
-### Training
 
 전처리 & 학습 & 예측을 동시에 하려면 다음 명령어를 사용하세요:
 
@@ -94,5 +97,18 @@ dataset :
 python main.py -c config/model_args -m Model -p param1 value1 param2 value2 ...
 ```
 
-자세한 파싱 정보는 main.py를 참고하세요.
+EASE 모델 실행을 원하면, 다음 명령어를 사용하세요:
+
+```bash
+python main.py -c config/model_config.yaml -m EASE -p _lambda 1000
+```
+
+EASER 모델 실행을 원하면, 다음 명령어를 사용하세요:
+
+```bash
+python main.py -c config/model_config.yaml -m EASER -p epochs 1000 rho 50000
+```
+
+
+자세한 파싱 정보는 main.py를 참고해주세요.
 
